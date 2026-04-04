@@ -1,5 +1,5 @@
 import { Suspense, useEffect, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircularProgress, Box } from '@mui/material';
 
@@ -100,6 +100,7 @@ const RedirectIfAuth = ({ children }: { children: React.ReactElement }) => {
 const App = () => {
   const { t } = useTranslation();
   const { isAdmin, isAuthenticated, token, fetchProfile } = useAuthStore();
+  const location = useLocation();
 
   useEffect(() => {
     // On page reload / first mount, if we have a persisted token, fetch fresh user data
@@ -110,9 +111,15 @@ const App = () => {
 
   useEffect(() => {
     // Dismiss the preloader after the animation completes (~5 s)
-    const t = setTimeout(dismissPreloader, 5000);
-    return () => clearTimeout(t);
-  }, []);
+    // Only if on the root path where the preloader is shown.
+    if (location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/loading') {
+      const t = setTimeout(dismissPreloader, 5000);
+      return () => clearTimeout(t);
+    } else {
+      // If direct link to another page, dismiss immediately
+      dismissPreloader();
+    }
+  }, [location.pathname]);
 
   if (COMING_SOON) {
     return (
@@ -128,7 +135,7 @@ const App = () => {
 
   return (
     <>
-      <Preloader />
+      {(location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/loading') && <Preloader />}
       <OfflineBanner />
       <Suspense
         fallback={

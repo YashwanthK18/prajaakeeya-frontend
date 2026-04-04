@@ -658,6 +658,20 @@
       }
     }
   </style>
+  <!-- ═══ Path-based Preloader Toggle ═══ -->
+  <style id="preloader-hide-style">
+    #preloader { display: none !important; }
+  </style>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      // Show preloader only on root or explicit loading page
+      if (path === '/' || path === '/index.html' || path === '/loading') {
+        var style = document.getElementById('preloader-hide-style');
+        if (style) style.remove();
+      }
+    })();
+  </script>
 </head>
 
 <body>
