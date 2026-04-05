@@ -18,10 +18,10 @@ import useThemeStore from "../store/useThemeStore";
 // ── Static data ───────────────────────────────────────────────────────────────
 
 const SOCIAL_LINKS_BASE = [
-  { alt: "Facebook", href: "https://www.facebook.com/prajaakeeyalive/" },
-  { alt: "X", href: "https://twitter.com/uttamaprajaakeeya" },
-  { alt: "YouTube", href: "https://youtube.com/uttamaprajaakeeya" },
-  { alt: "Instagram", href: "https://www.instagram.com/prajaakeeyalive/" },
+  { alt: "Facebook", href: "#" },
+  { alt: "X", href: "#" },
+  { alt: "YouTube", href: "#" },
+  { alt: "Instagram", href: "#" },
 ];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
