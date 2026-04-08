@@ -17,7 +17,6 @@
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
     "axios": "^1.6.7",
-    "firebase": "^12.9.0",
     "framer-motion": "^12.28.1",
     "i18next": "^23.10.1",
     "i18next-browser-languagedetector": "^7.1.0",
