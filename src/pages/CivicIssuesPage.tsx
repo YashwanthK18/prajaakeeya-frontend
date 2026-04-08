@@ -727,6 +727,25 @@ const CivicIssuesPage: React.FC = () => {
                 />
               </Stack>
             )}
+            {isGramPanchayat && (
+              <Typography sx={{ fontFamily: FF, fontSize: '0.85rem', color: '#F5A800', mt: 1.5 }}>
+                {(() => {
+                  const msg = t('civicIssues.gpVillageNotFound', { defaultValue: 'If you are unable to find your Grama Panchayat or village, please report it to support@prajaakeeya.org' });
+                  const email = 'support@prajaakeeya.org';
+                  const idx = msg.indexOf(email);
+                  if (idx === -1) return msg;
+                  return (
+                    <>
+                      {msg.slice(0, idx)}
+                      <Box component="a" href={`mailto:${email}`} sx={{ color: '#F5A800', textDecoration: 'underline' }}>
+                        {email}
+                      </Box>
+                      {msg.slice(idx + email.length)}
+                    </>
+                  );
+                })()}
+              </Typography>
+            )}
           </Box>
         </motion.div>
       ) : null}

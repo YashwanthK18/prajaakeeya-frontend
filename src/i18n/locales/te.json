@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} చేతులు ఎత్తబడ్డాయి",
     "constituency": "నియోజకవర్గం",
     "municipality": "మున్సిపాలిటీ",
-    "electionType": "ఎన్నిక రకం"
+    "electionType": "ఎన్నిక రకం",
+    "gpVillageNotFound": "మీరు మీ గ్రామ పంచాయతీ లేదా గ్రామాన్ని కనుగొనలేకపోతే, దయచేసి support@prajaakeeya.org కు నివేదించండి."
   },
   "postRegistration": {
     "publicServantQuestion": "మీరు పబ్లిక్ సర్వెంట్ కావడానికి సిద్ధంగా ఉన్నారా?",

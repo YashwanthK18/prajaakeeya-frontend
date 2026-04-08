@@ -1666,7 +1666,8 @@
     "handRaise_other": "{{count}} reported",
     "constituency": "Constituency",
     "municipality": "Municipality",
-    "electionType": "Election Type"
+    "electionType": "Election Type",
+    "gpVillageNotFound": "If you are unable to find your Grama Panchayat or village, please report it to support@prajaakeeya.org."
   },
   "postRegistration": {
     "publicServantQuestion": "Are you willing to become a Public Servant?",

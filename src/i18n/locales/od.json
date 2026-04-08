@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} ଜଣ ହାତ ଉଠାଇଛନ୍ତି",
     "constituency": "ନିର୍ବାଚନ ମଣ୍ଡଳୀ",
     "municipality": "ନଗରପାଳିକା",
-    "electionType": "ନିର୍ବାଚନ ପ୍ରକାର"
+    "electionType": "ନିର୍ବାଚନ ପ୍ରକାର",
+    "gpVillageNotFound": "ଆପଣ ଯଦି ଆପଣଙ୍କର ଗ୍ରାମ ପଞ୍ଚାୟତ କିମ୍ବା ଗ୍ରାମ ଖୋଜି ପାଉନାହାଁନ୍ତି, ଦୟାକରି support@prajaakeeya.org କୁ ଜଣାନ୍ତୁ।"
   },
   "postRegistration": {
     "publicServantQuestion": "ଆପଣ କ'ଣ ଜନସେବକ ହେବାକୁ ପ୍ରସ୍ତୁତ ଅଛନ୍ତି?",

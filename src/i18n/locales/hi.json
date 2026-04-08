@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} हाथ उठाए गए",
     "constituency": "निर्वाचन क्षेत्र",
     "municipality": "नगरपालिका",
-    "electionType": "चुनाव प्रकार"
+    "electionType": "चुनाव प्रकार",
+    "gpVillageNotFound": "यदि आप अपनी ग्राम पंचायत या गाँव नहीं ढूंढ पा रहे हैं, तो कृपया support@prajaakeeya.org पर रिपोर्ट करें।"
   },
   "postRegistration": {
     "publicServantQuestion": "क्या आप जनसेवक बनने के लिए तैयार हैं?",

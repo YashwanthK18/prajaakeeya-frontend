@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} हात उंचावले",
     "constituency": "मतदारसंघ",
     "municipality": "नगरपालिका",
-    "electionType": "निवडणूक प्रकार"
+    "electionType": "निवडणूक प्रकार",
+    "gpVillageNotFound": "जर तुम्हाला तुमची ग्रामपंचायत किंवा गाव सापडत नसेल, तर कृपया support@prajaakeeya.org वर कळवा."
   },
   "postRegistration": {
     "publicServantQuestion": "तुम्ही लोकसेवक बनण्यास तयार आहात का?",

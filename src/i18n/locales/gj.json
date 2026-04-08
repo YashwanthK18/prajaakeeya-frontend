@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} હાથ ઊંચા કર્યા",
     "constituency": "મતવિસ્તાર",
     "municipality": "નગરપાલિકા",
-    "electionType": "ચૂંટણી પ્રકાર"
+    "electionType": "ચૂંટણી પ્રકાર",
+    "gpVillageNotFound": "જો તમે તમારી ગ્રામ પંચાયત અથવા ગામ શોધી શકતા નથી, તો કૃપા કરીને support@prajaakeeya.org પર જાણ કરો."
   },
   "postRegistration": {
     "publicServantQuestion": "શું તમે જનસેવક બનવા માટે તૈયાર છો?",

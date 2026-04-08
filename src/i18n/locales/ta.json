@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} கைகள் உயர்த்தப்பட்டன",
     "constituency": "தொகுதி",
     "municipality": "நகராட்சி",
-    "electionType": "தேர்தல் வகை"
+    "electionType": "தேர்தல் வகை",
+    "gpVillageNotFound": "உங்கள் கிராம பஞ்சாயத்து அல்லது கிராமத்தைக் கண்டுபிடிக்க முடியவில்லை என்றால், தயவுசெய்து support@prajaakeeya.org க்கு தெரிவிக்கவும்."
   },
   "postRegistration": {
     "publicServantQuestion": "நீங்கள் பொது ஊழியராக மாறத் தயாராக இருக்கிறீர்களா?",

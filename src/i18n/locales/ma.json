@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} കൈകൾ ഉയർത്തി",
     "constituency": "മണ്ഡലം",
     "municipality": "മുനിസിപ്പാലിറ്റി",
-    "electionType": "തിരഞ്ഞെടുപ്പ് തരം"
+    "electionType": "തിരഞ്ഞെടുപ്പ് തരം",
+    "gpVillageNotFound": "നിങ്ങളുടെ ഗ്രാമ പഞ്ചായത്ത് അല്ലെങ്കിൽ ഗ്രാമം കണ്ടെത്താൻ കഴിയുന്നില്ലെങ്കിൽ, ദയവായി support@prajaakeeya.org-ലേക്ക് റിപ്പോർട്ട് ചെയ്യുക."
   },
   "postRegistration": {
     "publicServantQuestion": "നിങ്ങൾ ഒരു പബ്ലിക് സെർവന്റ് ആകാൻ തയ്യാറാണോ?",

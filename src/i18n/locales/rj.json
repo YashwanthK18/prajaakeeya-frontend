@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} हाथ उठाया",
     "constituency": "निर्वाचन क्षेत्र",
     "municipality": "नगरपालिका",
-    "electionType": "चुनाव प्रकार"
+    "electionType": "चुनाव प्रकार",
+    "gpVillageNotFound": "जे थां आपरी ग्राम पंचायत या गांव नीं मिल रैयो है, तो कृपया support@prajaakeeya.org पर रिपोर्ट करो।"
   },
   "postRegistration": {
     "publicServantQuestion": "कांई थे जनसेवक बणन वास्ते तैयार हो?",

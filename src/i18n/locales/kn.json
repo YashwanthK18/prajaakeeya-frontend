@@ -1629,7 +1629,8 @@
     "handRaise_other": "{{count}} ವರದಿ",
     "constituency": "ಕ್ಷೇತ್ರ",
     "municipality": "ನಗರಸಭೆ",
-    "electionType": "ಚುನಾವಣೆ ಪ್ರಕಾರ"
+    "electionType": "ಚುನಾವಣೆ ಪ್ರಕಾರ",
+    "gpVillageNotFound": "ನಿಮ್ಮ ಗ್ರಾಮ ಪಂಚಾಯಿತಿ ಅಥವಾ ಗ್ರಾಮವನ್ನು ಕಂಡುಹಿಡಿಯಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ, ದಯವಿಟ್ಟು support@prajaakeeya.org ಗೆ ತಿಳಿಸಿ."
   },
   "postRegistration": {
     "publicServantQuestion": "ನೀವು ಕಾರ್ಮಿಕನಾಗಲು (ಸಾರ್ವಜನಿಕ ಸೇವಕ) ಆಕಾಂಕ್ಷಿಯೇ?",

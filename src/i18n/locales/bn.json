@@ -1665,7 +1665,8 @@
     "handRaise_other": "{{count}} জন হাত তুলেছেন",
     "constituency": "নির্বাচনী এলাকা",
     "municipality": "পৌরসভা",
-    "electionType": "নির্বাচনের ধরন"
+    "electionType": "নির্বাচনের ধরন",
+    "gpVillageNotFound": "আপনি যদি আপনার গ্রাম পঞ্চায়েত বা গ্রাম খুঁজে না পান, অনুগ্রহ করে support@prajaakeeya.org-এ জানান।"
   },
   "postRegistration": {
     "publicServantQuestion": "আপনি কি জনসেবক হতে প্রস্তুত?",
