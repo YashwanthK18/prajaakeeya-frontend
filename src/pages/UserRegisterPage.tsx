@@ -20,7 +20,7 @@ import {
   InfoOutlined as InfoIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getGoogleOAuthUrl } from "../services/authService";
 import useAuthStore from "../store/useAuthStore";
 import * as yup from "yup";
@@ -37,6 +37,7 @@ const UserRegisterPage = () => {
   const isDark = theme.palette.mode === "dark";
   const { setAuth, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -116,6 +117,28 @@ const UserRegisterPage = () => {
   const isAppleDevice =
     typeof navigator !== "undefined" &&
     /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+  // If the OAuth callback detected a freshly-created account, it redirects
+  // here with ?celebrate=1 and stashes the token+user in sessionStorage.
+  // Show the celebration screen; the Continue button will finalize auth.
+  useEffect(() => {
+    if (searchParams.get("celebrate") !== "1") return;
+    const stored = sessionStorage.getItem("__PENDING_AUTH__");
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed?.token && parsed?.user) {
+        setPendingAuth(parsed);
+        setShowCelebration(true);
+      }
+    } catch {
+      // ignore parse errors
+    }
+    sessionStorage.removeItem("__PENDING_AUTH__");
+    const next = new URLSearchParams(searchParams);
+    next.delete("celebrate");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Pre-fill form if redirected from Google auth bridge (new user flow)
   useEffect(() => {
     const stored = sessionStorage.getItem("__GOOGLE_AUTH__");
@@ -144,6 +167,9 @@ const UserRegisterPage = () => {
       return;
     }
     setGoogleLoading(true);
+    // Mark that this OAuth flow started from the Register page so the
+    // callback can show the celebration screen for fresh signups.
+    sessionStorage.setItem("__FROM_REGISTER__", "1");
     window.location.href = getGoogleOAuthUrl();
   };
 
