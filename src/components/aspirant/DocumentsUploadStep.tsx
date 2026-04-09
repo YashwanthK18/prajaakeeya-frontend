@@ -10,6 +10,7 @@ import {
   Alert,
   LinearProgress,
   Chip,
+  CircularProgress,
   useTheme,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -433,16 +434,21 @@ const DocumentsUploadStep = ({
                           <Chip label={documents.sopEn.name} size="small" sx={{ mb: 1 }} onDelete={() => setDocuments(prev => ({ ...prev, sopEn: null }))} />
                         )}
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          {(() => {
+                            const sopUploading = !!documents.sopEn && !documents.sopEn.uploaded && !documents.sopEn.error;
+                            return (
                           <Button
                             fullWidth
                             component="label"
                             variant="contained"
-                            startIcon={<CloudUploadIcon />}
-                            disabled={documents.sopEn?.uploaded}
+                            startIcon={sopUploading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CloudUploadIcon />}
+                            disabled={documents.sopEn?.uploaded || sopUploading}
                             size="small"
                             sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 700, fontSize: '0.78rem', py: 0.6, px: 1.5 }}
                           >
-                            {t('forms.aspirant.documents.signAndUpload') || 'Sign and Upload'}
+                            {sopUploading
+                              ? ((t('common.uploading') || 'Uploading…') + (documents.sopEn?.progress ? ` ${documents.sopEn.progress}%` : ''))
+                              : (t('forms.aspirant.documents.signAndUpload') || 'Sign and Upload')}
                             <input
                               type="file"
                               hidden
@@ -501,6 +507,8 @@ const DocumentsUploadStep = ({
                               }}
                             />
                           </Button>
+                            );
+                          })()}
                         </Box>
                         {documents.sopEn?.error && (
                           <Alert severity="error" sx={{ mt: 1.2, py: 0.3, bgcolor: isDark ? 'rgba(255,65,65,0.08)' : 'rgba(255,65,65,0.12)', color: isDark ? '#ffd3d3' : '#8b1111' }}>
