@@ -725,6 +725,7 @@ const CandidateInformationStep = ({
               <Autocomplete
                 options={municipalities}
                 getOptionLabel={(option) => option.name}
+                getOptionDisabled={(option) => !/greater bengaluru authority/i.test(option.name)}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 value={selectedMunicipality}
                 onChange={(_, selected) => {
