@@ -640,7 +640,7 @@ const CandidateInformationStep = ({
           </TextField>
           {selectedElectionForAge?.type === 'gram_panchayat' && (
             <Typography variant="body2" sx={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.55)', fontStyle: 'italic', mt: 1, fontFamily: FF, fontSize: '0.78rem' }}>
-              {t('gpVillageNotFound')}
+              {t('civicIssues.gpVillageNotFound')}
             </Typography>
           )}
         </>

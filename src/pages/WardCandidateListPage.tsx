@@ -1425,7 +1425,7 @@ const WardCandidateListPage = () => {
         {/* GP / Village not found help message */}
         {isGramPanchayat && (
           <Typography variant="body2" sx={{ color: textFaint, fontStyle: 'italic', mt: 0.5 }}>
-            {t('gpVillageNotFound')}
+            {t('civicIssues.gpVillageNotFound')}
           </Typography>
         )}
 
