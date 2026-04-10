@@ -432,7 +432,7 @@ const CandidateInformationStep = ({
           placeholder={t('forms.aspirant.name')}
           disabled={loading}
           InputLabelProps={{ shrink: true, sx: { color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(15,23,42,0.62)', fontFamily: FF } }}
-          inputProps={{ style: { fontFamily: FF } }}
+          inputProps={{ style: { fontFamily: FF }, autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
         />
       ),
     },
@@ -446,7 +446,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.phone}
           helperText={errors.phone && t((errors.phone as any).message || 'validation.phone')}
-          inputProps={{ maxLength: 10, inputMode: 'tel' as const, pattern: '[6-9][0-9]{9}' }}
+          inputProps={{ maxLength: 10, inputMode: 'tel' as const, pattern: '[6-9][0-9]{9}', autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           onChange={e => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
             phoneOnChange(e);
@@ -466,7 +466,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.whatsappNumber}
           helperText={errors.whatsappNumber && t((errors.whatsappNumber as any).message || 'validation.whatsappNumber')}
-          inputProps={{ maxLength: 10, inputMode: 'tel' as const, pattern: '[6-9][0-9]{9}' }}
+          inputProps={{ maxLength: 10, inputMode: 'tel' as const, pattern: '[6-9][0-9]{9}', autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           InputProps={{
             startAdornment: (
               <Box component="span" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
@@ -523,6 +523,7 @@ const CandidateInformationStep = ({
           defaultValue=""
           disabled={loading}
           InputLabelProps={{ sx: { color: 'rgba(255,255,255,0.45)', fontFamily: FF }, shrink: undefined }}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           sx={darkFieldSx}
         />
       ),
@@ -562,7 +563,7 @@ const CandidateInformationStep = ({
             }
             return t(msg);
           })()}
-          inputProps={{ min: currentMinAge, max: 150, step: 1, inputMode: 'numeric' as const }}
+          inputProps={{ min: currentMinAge, max: 150, step: 1, inputMode: 'numeric' as const, autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           onKeyDown={e => { if (['-', '+', 'e', 'E', '.'].includes(e.key)) e.preventDefault(); }}
           sx={darkFieldSx}
         />
@@ -577,6 +578,7 @@ const CandidateInformationStep = ({
           {...register('education')}
           defaultValue=""
           disabled={loading}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           sx={darkFieldSx}
         />
       ),
@@ -590,6 +592,7 @@ const CandidateInformationStep = ({
           {...register('occupation')}
           defaultValue=""
           disabled={loading}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           sx={darkFieldSx}
         />
       ),
@@ -862,6 +865,7 @@ const CandidateInformationStep = ({
           helperText={errors.manifesto && t(errors.manifesto.message || 'validation.required')}
           placeholder={t('pages.candidateDetails.labels.about')}
           disabled={loading}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           sx={darkFieldSx}
         />
       ),
@@ -878,6 +882,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.instagramLink}
           helperText={errors.instagramLink && t((errors.instagramLink as any).message || 'validation.instagramLink')}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           InputProps={{
             startAdornment: (
               <Box component="span" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
@@ -914,6 +919,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.facebookLink}
           helperText={errors.facebookLink && t((errors.facebookLink as any).message || 'validation.facebookLink')}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           InputProps={{
             startAdornment: (
               <Box component="span" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
@@ -940,6 +946,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.linkedinLink}
           helperText={errors.linkedinLink && t((errors.linkedinLink as any).message || 'validation.linkedinLink')}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           InputProps={{
             startAdornment: (
               <Box component="span" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
@@ -966,6 +973,7 @@ const CandidateInformationStep = ({
           disabled={loading}
           error={!!errors.twitterLink}
           helperText={errors.twitterLink && t((errors.twitterLink as any).message || 'validation.twitterLink')}
+          inputProps={{ autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off', spellCheck: false }}
           InputProps={{
             startAdornment: (
               <Box component="span" sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
