@@ -43,6 +43,7 @@ interface Props {
   onUploadSuccess?: (result: any) => void; // Called after successful auto-upload
   onUploadError?: (error: any) => void; // Called when auto-upload fails
   alreadyUploaded?: boolean; // True when photo was already uploaded in a previous session (draft restore)
+  uploadedPhotoUrl?: string | null; // Server URL of already-uploaded photo to show as preview
 }
 
 const LivePhotoCaptureStep = ({
@@ -64,6 +65,7 @@ const LivePhotoCaptureStep = ({
   onUploadSuccess,
   onUploadError,
   alreadyUploaded,
+  uploadedPhotoUrl,
 }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -467,13 +469,21 @@ const LivePhotoCaptureStep = ({
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                 <Stack spacing={1.6} alignItems="center">
                   <Box sx={{
-                    width: 120, height: 120, borderRadius: '50%',
+                    width: 200, height: 200, borderRadius: '50%',
+                    overflow: 'hidden',
+                    boxShadow: '0 0 0 2px rgba(43,180,104,0.45), 0 10px 30px rgba(0,0,0,0.35)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'linear-gradient(135deg,rgba(43,180,104,0.18),rgba(43,180,104,0.08))',
-                    border: '2px solid rgba(43,180,104,0.45)',
-                    boxShadow: '0 0 0 2px rgba(43,180,104,0.12), 0 10px 30px rgba(0,0,0,0.2)',
+                    background: 'rgba(0,0,0,0.3)',
                   }}>
-                    <CheckCircleIcon sx={{ fontSize: 56, color: '#4caf50' }} />
+                    {uploadedPhotoUrl ? (
+                      <img
+                        src={uploadedPhotoUrl}
+                        alt="Uploaded"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    ) : (
+                      <CheckCircleIcon sx={{ fontSize: 80, color: '#4caf50' }} />
+                    )}
                   </Box>
                   <Stack direction="row" spacing={0.8} alignItems="center">
                     <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 18 }} />

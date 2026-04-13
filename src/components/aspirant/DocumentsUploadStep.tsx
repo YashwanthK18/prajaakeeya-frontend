@@ -80,6 +80,7 @@ interface Props {
   clearPhoto?: () => void;
   aspirantId?: number | null;
   onAspirantUpdated?: (data: any) => void;
+  uploadedPhotoUrl?: string | null;
 }
 
 const DOC_CONFIG: Array<{
@@ -119,6 +120,7 @@ const DocumentsUploadStep = ({
   clearPhoto,
   aspirantId,
   onAspirantUpdated,
+  uploadedPhotoUrl,
 }: Props) => {
   const { t } = useTranslation();
   // Placeholder SOP download URLs — replace with actual hosted files
@@ -229,6 +231,7 @@ const DocumentsUploadStep = ({
                 clearPhoto={clearPhoto}
                 aspirantId={aspirantId ?? undefined}
                 alreadyUploaded={!!documents.photo?.uploaded}
+                uploadedPhotoUrl={uploadedPhotoUrl}
                 onUploadSuccess={(result) => {
                   // Mark photo as uploaded so the parent can proceed
                   setDocuments(prev => ({ ...prev, photo: { name: 'selfie.png', size: 0, uploaded: true, progress: 100 } }));

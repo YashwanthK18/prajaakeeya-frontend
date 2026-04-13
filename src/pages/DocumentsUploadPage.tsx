@@ -394,6 +394,7 @@ const DocumentsUploadPage = () => {
         onSelfieCaptured={handleAspirantSelfieCaptured}
         clearPhoto={clearPhoto}
         aspirantId={aspirantResp?.id ?? user?.aspirantId ?? null}
+        uploadedPhotoUrl={aspirantResp?.selfieUrl || aspirantResp?.recentPhotoUrl || null}
         onAspirantUpdated={async (result) => {
           try {
             if (result) {
