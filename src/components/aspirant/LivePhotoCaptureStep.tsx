@@ -276,7 +276,7 @@ const LivePhotoCaptureStep = ({
       <Box sx={{ px: { xs: 2, sm: 4 }, py: 2.8 }}>
         <Box sx={{ maxWidth: 600, mx: 'auto' }}>
           <Stack spacing={3} alignItems="center">
-            {!cameraActive && !capturedPhoto && !showLiveness && (
+            {!cameraActive && !capturedPhoto && !showLiveness && uploadStatus !== 'success' && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
                 <Stack spacing={2.2} alignItems="center">
                   <CameraAltIcon sx={{ fontSize: 80, color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(15,23,42,0.5)' }} />
@@ -459,6 +459,42 @@ const LivePhotoCaptureStep = ({
                       {t('forms.aspirant.livePhoto.capture')}
                     </Button>
                   </Stack>
+                </Stack>
+              </motion.div>
+            )}
+
+            {uploadStatus === 'success' && !capturedPhoto && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <Stack spacing={1.6} alignItems="center">
+                  <Box sx={{
+                    width: 120, height: 120, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'linear-gradient(135deg,rgba(43,180,104,0.18),rgba(43,180,104,0.08))',
+                    border: '2px solid rgba(43,180,104,0.45)',
+                    boxShadow: '0 0 0 2px rgba(43,180,104,0.12), 0 10px 30px rgba(0,0,0,0.2)',
+                  }}>
+                    <CheckCircleIcon sx={{ fontSize: 56, color: '#4caf50' }} />
+                  </Box>
+                  <Stack direction="row" spacing={0.8} alignItems="center">
+                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 18 }} />
+                    <Typography sx={{ fontFamily: FF, fontSize: '0.88rem', color: '#4caf50', fontWeight: 700 }}>
+                      {t('common.uploaded') || 'Uploaded!'}
+                    </Typography>
+                  </Stack>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CameraswitchIcon />}
+                    onClick={() => { if (onSelfieCaptured && clearPhoto) { clearPhoto(); setShowLiveness(true); } else { retakePhoto?.(); } }}
+                    sx={{
+                      fontFamily: FF, fontWeight: 700,
+                      color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(15,23,42,0.8)',
+                      borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(15,23,42,0.2)',
+                      '&:hover': { borderColor: GOLDD, color: GOLD, bgcolor: 'rgba(245,168,0,0.06)' },
+                    }}
+                  >
+                    {t('forms.aspirant.livePhoto.retake')}
+                  </Button>
                 </Stack>
               </motion.div>
             )}

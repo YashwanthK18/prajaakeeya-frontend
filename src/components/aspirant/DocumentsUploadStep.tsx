@@ -249,43 +249,6 @@ const DocumentsUploadStep = ({
         {['#C8180A', '#253A9A', '#6B3A00'].map(c => <Box key={c} sx={{ flex: 1, bgcolor: c }} />)}
       </Box>
 
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.42 }}>
-        <Box sx={{
-          px: { xs: 2.5, sm: 4 },
-          pt: 3.25,
-          pb: 2.2,
-          borderBottom: `1px solid ${cardBorder}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-        }}>
-          <Box sx={{
-            width: 52,
-            minWidth: 52,
-            height: 52,
-            minHeight: 52,
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg,rgba(200,24,10,.24),rgba(37,58,154,.22))',
-            border: '1.5px solid rgba(245,168,0,.35)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <UploadFileIcon sx={{ color: GOLD, fontSize: 28 }} />
-          </Box>
-          <Box>
-            <Typography sx={{
-              fontFamily: FF,
-              fontWeight: 800,
-              fontSize: { xs: '1.08rem', sm: '1.32rem' },
-              color: textPrimary,
-            }}>
-              {t('forms.aspirant.documents.title')}
-            </Typography>
-          </Box>
-        </Box>
-      </motion.div>
 
       <Box sx={{ px: { xs: 2, sm: 4 }, py: 2.5 }}>
         <motion.div variants={containerVariants} initial="hidden" animate="visible">
