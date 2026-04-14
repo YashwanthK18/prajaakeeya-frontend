@@ -190,9 +190,7 @@ const HomePage: React.FC = () => {
     display: 'inline-flex', alignItems: 'center', gap: 8,
     fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5,
     color: isDark ? '#FFD700' : 'rgb(146, 24, 24)',
-    background: isDark ? 'rgba(239,68,68,.08)' : 'rgba(239,68,68,.06)',
-    border: `1px solid ${isDark ? 'rgba(239,68,68,.15)' : 'rgba(239,68,68,.25)'}`,
-    borderRadius: 24, padding: '6px 16px', marginBottom: 18,
+    marginBottom: 18,
   };
 
   const S: Record<string, React.CSSProperties> = {
