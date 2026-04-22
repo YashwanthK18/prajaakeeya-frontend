@@ -26,8 +26,6 @@ export interface VillageResult {
 }
 
 const adminGramaPanchayatService = {
-  getAll: (filters?: GramaPanchayatFilters) =>
-    apiClient.get<GramaPanchayat[]>('/admin/grama-panchayat', { params: filters }),
   getVillages: (params: Required<Pick<GramaPanchayatFilters, 'state' | 'district' | 'taluk' | 'gpName'>>) =>
     apiClient.get<VillageResult[]>('/grama-panchayat/villages', { params }),
   create: (data: Omit<GramaPanchayat, 'srNo'>) =>

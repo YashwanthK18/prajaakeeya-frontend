@@ -128,52 +128,34 @@ const AdminGramaPanchayatPage: React.FC = () => {
   }, [formData.taluk]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchList = () => {
-    setLoading(true);
-    setError('');
-
-    // Use the public villages endpoint when all 4 filters are set
-    if (filterState && filterDistrict && filterTaluk && filterGP) {
-      adminGramaPanchayatService
-        .getVillages({ state: filterState, district: filterDistrict, taluk: filterTaluk, gpName: filterGP })
-        .then((resp) => {
-          const villages: VillageResult[] = Array.isArray(resp.data) ? resp.data : [];
-          // Augment with the selected filter values for display
-          const mapped: GramaPanchayat[] = villages.map((v) => ({
-            srNo: v.id,
-            state: filterState,
-            district: filterDistrict,
-            taluk: filterTaluk,
-            gpName: filterGP,
-            villageName: v.villageName,
-            villageCode: v.villageCode,
-            population: v.population,
-          }));
-          setItems(mapped);
-        })
-        .catch((err) => {
-          setError(err?.response?.data?.message || 'Failed to fetch data');
-          setItems([]);
-        })
-        .finally(() => setLoading(false));
+    if (!filterState || !filterDistrict || !filterTaluk || !filterGP) {
+      setError('Please select State, District, Taluk, and Grama Panchayat to search.');
       return;
     }
-
-    // Otherwise use the admin endpoint with available filters
-    const filters: Record<string, string> = {};
-    if (filterState) filters.state = filterState;
-    if (filterDistrict) filters.district = filterDistrict;
-    if (filterTaluk) filters.taluk = filterTaluk;
+    setLoading(true);
+    setError('');
     adminGramaPanchayatService
-      .getAll(Object.keys(filters).length ? filters : undefined)
-      .then((resp) => setItems(Array.isArray(resp.data) ? resp.data : []))
+      .getVillages({ state: filterState, district: filterDistrict, taluk: filterTaluk, gpName: filterGP })
+      .then((resp) => {
+        const villages: VillageResult[] = Array.isArray(resp.data) ? resp.data : [];
+        const mapped: GramaPanchayat[] = villages.map((v) => ({
+          srNo: v.id,
+          state: filterState,
+          district: filterDistrict,
+          taluk: filterTaluk,
+          gpName: filterGP,
+          villageName: v.villageName,
+          villageCode: v.villageCode,
+          population: v.population,
+        }));
+        setItems(mapped);
+      })
       .catch((err) => {
         setError(err?.response?.data?.message || 'Failed to fetch data');
         setItems([]);
       })
       .finally(() => setLoading(false));
   };
-
-  useEffect(() => { fetchList(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openCreate = () => {
     setEditing(null);
