@@ -11,6 +11,7 @@ export interface AdminUser {
   wardName?: string | null;
   wardNumber?: string | null;
   corporationName?: string | null;
+  profilePicture?: string | null;
   isBlocked?: boolean;
 }
 
@@ -43,6 +44,13 @@ export const adminUsersService = {
     }
 
     return [] as AdminUser[];
+  },
+
+  getVoters: async (params?: { page?: number; limit?: number; search?: string }) => {
+    const resp = await apiClient.get<{ data: AdminUser[]; total: number; totalUsers: number; page: number; limit: number; totalPages: number }>(
+      '/users/voters', { params }
+    );
+    return resp.data;
   },
 
   createUser: async (data: { epicNumber: string; phone: string; role: string }) => {

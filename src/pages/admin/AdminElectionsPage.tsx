@@ -169,7 +169,6 @@ const AdminElectionsPage: React.FC = () => {
                       <TableCell>{t('adminElections.table.id')}</TableCell>
                       <TableCell>{t('adminElections.table.type')}</TableCell>
                       <TableCell>{t('adminElections.table.name')}</TableCell>
-                      <TableCell>{t('adminElections.table.scope')}</TableCell>
                       <TableCell align="right">{t('adminElections.table.actions')}</TableCell>
                     </TableRow>
                   </TableHead>
@@ -192,7 +191,6 @@ const AdminElectionsPage: React.FC = () => {
                             </Typography>
                           </TableCell>
                           <TableCell>{election.name}</TableCell>
-                          <TableCell>{election.scope || '-'}</TableCell>
                           <TableCell align="right">
                             <Tooltip title={t('adminElections.edit')}>
                               <IconButton

@@ -48,10 +48,10 @@ const AdminMunicipalityPage: React.FC = () => {
 
   useEffect(() => {
     getStates()
-      .then((resp: { data: string[] }) => {
-        const extractNames = (data: string[]) => {
+      .then((resp: { data: any[] }) => {
+        const extractNames = (data: any[]) => {
           if (!Array.isArray(data)) return [];
-          return data.map((item) => (typeof item === 'string' ? item : String(item)));
+          return data.map((item) => (typeof item === 'string' ? item : item?.name || String(item)));
         };
         setStates(extractNames(resp.data));
       })

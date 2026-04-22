@@ -23,7 +23,8 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  Grid
+  Grid,
+  Autocomplete,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -193,9 +194,9 @@ const AdminGramaPanchayatPage: React.FC = () => {
   };
 
   const submitForm = async () => {
-    const { state, district, taluk, gpName, villageName, villageCode } = formData;
-    if (!state || !district || !taluk || !gpName || !villageName || !villageCode) {
-      setFormError('All fields except population are required');
+    const { state, district, taluk, gpName, villageName } = formData;
+    if (!state || !district || !taluk || !gpName || !villageName) {
+      setFormError('All fields are required');
       return;
     }
     setFormLoading(true);
@@ -253,7 +254,6 @@ const AdminGramaPanchayatPage: React.FC = () => {
                 select size="small" label="State" value={filterState}
                 onChange={(e) => setFilterState(e.target.value)} sx={{ minWidth: 170 }}
               >
-                <MenuItem value="">All States</MenuItem>
                 {states.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
               </TextField>
 
@@ -309,15 +309,13 @@ const AdminGramaPanchayatPage: React.FC = () => {
                       <TableCell>Taluk</TableCell>
                       <TableCell>GP Name</TableCell>
                       <TableCell>Village Name</TableCell>
-                      <TableCell>Village Code</TableCell>
-                      <TableCell>Population</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {items.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                        <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
                           <Typography color="text.secondary">No records found</Typography>
                         </TableCell>
                       </TableRow>
@@ -330,8 +328,6 @@ const AdminGramaPanchayatPage: React.FC = () => {
                           <TableCell>{it.taluk}</TableCell>
                           <TableCell>{it.gpName}</TableCell>
                           <TableCell>{it.villageName}</TableCell>
-                          <TableCell>{it.villageCode}</TableCell>
-                          <TableCell>{it.population}</TableCell>
                           <TableCell align="right">
                             <Tooltip title="Edit">
                               <IconButton size="small" onClick={() => openEdit(it)}><EditIcon fontSize="small" /></IconButton>
@@ -366,25 +362,43 @@ const AdminGramaPanchayatPage: React.FC = () => {
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField select label="District" value={formData.district} onChange={handleField('district')}
-                  fullWidth size="small" disabled={!formData.state}>
-                  <MenuItem value="">Select District</MenuItem>
-                  {formDistricts.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
-                </TextField>
+                <Autocomplete
+                  freeSolo
+                  options={formDistricts}
+                  value={formData.district}
+                  disabled={!formData.state}
+                  onChange={(_, val) => setFormData(prev => ({ ...prev, district: val || '' }))}
+                  onInputChange={(_, val) => setFormData(prev => ({ ...prev, district: val || '' }))}
+                  renderInput={(params) => (
+                    <TextField {...params} label="District" size="small" fullWidth />
+                  )}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField select label="Taluk" value={formData.taluk} onChange={handleField('taluk')}
-                  fullWidth size="small" disabled={!formData.district}>
-                  <MenuItem value="">Select Taluk</MenuItem>
-                  {formTaluks.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-                </TextField>
+                <Autocomplete
+                  freeSolo
+                  options={formTaluks}
+                  value={formData.taluk}
+                  disabled={!formData.district}
+                  onChange={(_, val) => setFormData(prev => ({ ...prev, taluk: val || '' }))}
+                  onInputChange={(_, val) => setFormData(prev => ({ ...prev, taluk: val || '' }))}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Taluk" size="small" fullWidth />
+                  )}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField select label="GP Name" value={formData.gpName} onChange={handleField('gpName')}
-                  fullWidth size="small" disabled={!formData.taluk}>
-                  <MenuItem value="">Select GP</MenuItem>
-                  {formGPs.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
-                </TextField>
+                <Autocomplete
+                  freeSolo
+                  options={formGPs}
+                  value={formData.gpName}
+                  disabled={!formData.taluk}
+                  onChange={(_, val) => setFormData(prev => ({ ...prev, gpName: val || '' }))}
+                  onInputChange={(_, val) => setFormData(prev => ({ ...prev, gpName: val || '' }))}
+                  renderInput={(params) => (
+                    <TextField {...params} label="GP Name" size="small" fullWidth />
+                  )}
+                />
               </Grid>
               <Grid item xs={12}>
                 <TextField label="Village Name" value={formData.villageName} onChange={handleField('villageName')} fullWidth size="small" />

@@ -20,6 +20,7 @@ export interface Report {
     epicId: string;
     role: string;
     wardName: string;
+    profilePicture?: string | null;
   };
   reportedBy?: {
     id: number;
@@ -28,6 +29,7 @@ export interface Report {
     epicId: string;
     role: string;
     wardName: string;
+    profilePicture?: string | null;
   };
   ward?: {
     id: number;

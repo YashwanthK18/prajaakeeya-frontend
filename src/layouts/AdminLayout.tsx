@@ -35,7 +35,6 @@ import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/useAuthStore';
 import useThemeStore from '../store/useThemeStore';
 import prajakeeyaLogo from '../assets/images/prajakeeya.png';
-import LanguageSelector from '../components/LanguageSelector';
 
 const drawerWidth = 280;
 
@@ -243,11 +242,6 @@ const AdminLayout = () => {
                 />
               </Box>
             </Box>
-            <LanguageSelector
-              size="small"
-              variant="outlined"
-              sx={{ minWidth: 56, px: 1 }}
-            />
             <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
               <IconButton
                 onClick={toggleTheme}

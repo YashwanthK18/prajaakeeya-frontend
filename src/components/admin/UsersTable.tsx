@@ -1,22 +1,11 @@
 import React from 'react';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    IconButton,
-    Tooltip,
-    Box,
-    Typography,
-    Chip
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    IconButton, Tooltip, Box, Typography, Chip, Avatar,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import BlockIcon from '@mui/icons-material/Block';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 
 import { AdminUser } from '../../services/adminUsersService';
 
@@ -28,7 +17,7 @@ type Props = {
     onEdit?: (id: number) => void;
 };
 
-const UsersTable: React.FC<Props> = ({ users, onView, onToggleBlock, onDelete, onEdit }) => {
+const UsersTable: React.FC<Props> = ({ users, onView, onToggleBlock }) => {
     if (!users || users.length === 0) return <Box sx={{ py: 4 }}><Typography>No users found.</Typography></Box>;
 
     return (
@@ -36,64 +25,47 @@ const UsersTable: React.FC<Props> = ({ users, onView, onToggleBlock, onDelete, o
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                        <TableCell>Role</TableCell>
-                        <TableCell>EPIC</TableCell>
-                        <TableCell>Corporation</TableCell>
-                        <TableCell>Ward Name</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell align="right">Actions</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
-
                 <TableBody>
                     {users.map((u) => (
-                        <TableRow key={u.id}>
-                            <TableCell>{u.name}</TableCell>
-                            <TableCell>{u.email || '—'}</TableCell>
-                            <TableCell>{u.role}</TableCell>
-                            <TableCell>{u.epicId || '—'}</TableCell>
-                            <TableCell>{u.corporationName || '—'}</TableCell>
+                        <TableRow key={u.id} hover>
                             <TableCell>
-                                <Typography sx={{ fontWeight: 600 }}>{u.wardName || '—'}</Typography>
-                                {u.wardNumber && (
-                                    <Typography variant="caption" color="text.secondary">{u.wardNumber}</Typography>
-                                )}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <Avatar
+                                        src={u.profilePicture || undefined}
+                                        alt={u.name}
+                                        sx={{ width: 34, height: 34, bgcolor: 'primary.main' }}
+                                    >
+                                        {u.name?.charAt(0).toUpperCase()}
+                                    </Avatar>
+                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{u.name}</Typography>
+                                </Box>
                             </TableCell>
+                            <TableCell>{u.role}</TableCell>
                             <TableCell>
-                                {u.isBlocked ? (
-                                    <Chip label="Blocked" color="error" size="small" />
-                                ) : (
-                                    <Chip label="Active" color="success" size="small" />
-                                )}
+                                {u.isBlocked
+                                    ? <Chip label="Blocked" color="error" size="small" />
+                                    : <Chip label="Active" color="success" size="small" />
+                                }
                             </TableCell>
                             <TableCell align="right">
                                 <Tooltip title="View">
-                                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); onView && onView(u.id); }}>
+                                    <IconButton size="small" onClick={() => onView && onView(u.id)}>
                                         <VisibilityIcon />
                                     </IconButton>
                                 </Tooltip>
-
-                                <Tooltip title="Edit">
-                                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit && onEdit(u.id); }}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Tooltip>
-
                                 <Tooltip title={u.isBlocked ? 'Unblock' : 'Block'}>
                                     <IconButton
                                         size="small"
-                                        onClick={(e) => { e.stopPropagation(); onToggleBlock && onToggleBlock(u); }}
+                                        onClick={() => onToggleBlock && onToggleBlock(u)}
                                         color={u.isBlocked ? 'error' : 'default'}
                                     >
                                         {u.isBlocked ? <LockOpenIcon /> : <BlockIcon />}
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title="Delete">
-                                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDelete && onDelete(u.id); }}>
-                                        <DeleteIcon />
                                     </IconButton>
                                 </Tooltip>
                             </TableCell>

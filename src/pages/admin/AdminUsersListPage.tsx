@@ -1,30 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
-    Box,
-    Card,
-    CardContent,
-    Stack,
-    Typography,
-    TextField,
-    MenuItem,
-    Select,
-    InputLabel,
-    FormControl,
-    Button,
-    CircularProgress,
-    Pagination,
-    Grid,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Autocomplete
+    Box, Card, CardContent, Stack, Typography, TextField, InputAdornment,
+    Button, CircularProgress, Pagination, Grid, Dialog, DialogTitle,
+    DialogContent, DialogActions,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/useAuthStore';
 import UsersTable from '../../components/admin/UsersTable';
 import adminUsersService, { AdminUser } from '../../services/adminUsersService';
-import { getWards } from '../../services/wardService';
 
 const AdminUsersListPage: React.FC = () => {
     const navigate = useNavigate();
@@ -33,106 +17,64 @@ const AdminUsersListPage: React.FC = () => {
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
-    const [wardFilter, setWardFilter] = useState('');
-    const [wardsList, setWardsList] = useState<{ ward_number: string; ward_name: string }[]>([]);
-    const [selectedWard, setSelectedWard] = useState<{ ward_number: string; ward_name: string } | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const [confirm, setConfirm] = useState<{ open: boolean; id?: number; action?: 'delete' | 'block' | 'unblock' }>({ open: false });
+    const limit = 20;
+    const [confirm, setConfirm] = useState<{ open: boolean; id?: number; action?: 'block' | 'unblock' }>({ open: false });
+
+    const load = useCallback((pageNum: number, searchTerm: string) => {
+        setLoading(true);
+        adminUsersService.getVoters({ page: pageNum, limit, search: searchTerm || undefined })
+            .then((resp) => {
+                setUsers(resp.data);
+                setTotal(resp.totalUsers ?? resp.total ?? resp.data.length);
+                setTotalPages(resp.totalPages ?? 1);
+            })
+            .catch((e) => console.error('Failed to load users', e))
+            .finally(() => setLoading(false));
+    }, []);
 
     useEffect(() => {
-        if (!isAdmin) {
-            navigate('/');
-            return;
-        }
-        load();
-        // fetch wards for the filter
-        (async () => {
-            try {
-                const resp = await getWards();
-                const data = resp?.data ?? resp ?? [];
-                setWardsList(Array.isArray(data) ? data : []);
-            } catch (e) {
-                console.warn('Failed to load wards', e);
-            }
-        })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAdmin]);
+        if (!isAdmin) { navigate('/'); return; }
+        load(1, '');
+    }, [isAdmin, load, navigate]);
 
-    const load = async (opts?: { page?: number }) => {
-        setLoading(true);
-        try {
-            const p = opts?.page ?? page;
-            const resp = await adminUsersService.getUsers({ page: p, pageSize, search: search || undefined, status: statusFilter || undefined, wardNumber: wardFilter || undefined });
-            // backend may return array or { data, total }
-            if (Array.isArray(resp)) {
-                setUsers(resp as AdminUser[]);
-                setTotal((resp as AdminUser[]).length);
-            } else if (resp && Array.isArray((resp as any).data)) {
-                setUsers((resp as any).data as AdminUser[]);
-                setTotal(Number((resp as any).total ?? (resp as any).count ?? ((resp as any).data as AdminUser[]).length));
-            } else {
-                setUsers([]);
-                setTotal(0);
-            }
-            setPage(p);
-        } catch (e) {
-            console.error('Failed to load users', e);
-        } finally {
-            setLoading(false);
-        }
+    // Debounce search — fires 400ms after user stops typing
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPage(1);
+            load(1, search);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handlePageChange = (_: any, value: number) => {
+        setPage(value);
+        load(value, search);
     };
 
     const handleToggleBlock = (user: AdminUser) => {
         setConfirm({ open: true, id: user.id, action: user.isBlocked ? 'unblock' : 'block' });
     };
 
-    const handleDelete = (id?: number) => setConfirm({ open: true, id, action: 'delete' });
-
     const performConfirm = async () => {
         if (!confirm.id || !confirm.action) return setConfirm({ open: false });
         try {
-            if (confirm.action === 'delete') {
-                await adminUsersService.deleteUser(confirm.id);
-                // Remove the user from the list
-                setUsers(prev => prev.filter(u => u.id !== confirm.id));
-                setTotal(prev => prev - 1);
-            } else if (confirm.action === 'block') {
+            if (confirm.action === 'block') {
                 await adminUsersService.blockUser(confirm.id);
-                // Update the user status optimistically
                 setUsers(prev => prev.map(u => u.id === confirm.id ? { ...u, isBlocked: true } : u));
-            } else if (confirm.action === 'unblock') {
+            } else {
                 await adminUsersService.unblockUser(confirm.id);
-                // Update the user status optimistically
                 setUsers(prev => prev.map(u => u.id === confirm.id ? { ...u, isBlocked: false } : u));
             }
         } catch (e) {
             console.error('Action failed', e);
-            // Reload on error to ensure consistency
-            await load({ page });
+            load(page, search);
         } finally {
             setConfirm({ open: false });
         }
     };
-
-    const handlePageChange = (_: any, value: number) => {
-        setPage(value);
-        load({ page: value });
-    };
-
-    const wards = Array.from(new Set(users.map((u) => u.wardNumber).filter((v): v is string => Boolean(v)))) as string[];
-
-    // keep selectedWard in sync if wardFilter value is set externally
-    useEffect(() => {
-        if (!wardFilter) {
-            setSelectedWard(null);
-            return;
-        }
-        const found = wardsList.find((w) => w.ward_number === wardFilter) || null;
-        setSelectedWard(found);
-    }, [wardFilter, wardsList]);
 
     if (!isAdmin) return null;
 
@@ -140,49 +82,45 @@ const AdminUsersListPage: React.FC = () => {
         <Stack spacing={3}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700 }}>Users lists</Typography>
-                    {selectedWard && (
-                        <Typography variant="subtitle1" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                            Ward: {selectedWard.ward_name}
-                        </Typography>
-                    )}
+                    <Typography variant="h4" sx={{ fontWeight: 700 }}>User List</Typography>
+                    <Typography variant="body2" color="text.secondary">{total} user{total !== 1 ? 's' : ''} total</Typography>
                 </Box>
-                <Button variant="contained" color="primary" onClick={() => navigate('/admin/users/create')}>
-                    Create User
-                </Button>
             </Box>
 
             <Card>
                 <CardContent>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }} alignItems="center">
-                        <Box sx={{ minWidth: 250 }}>
-                            <Autocomplete
-                                options={wardsList}
-                                getOptionLabel={(o) => `${o.ward_number} • ${o.ward_name}`}
-                                value={selectedWard}
-                                onChange={(_, v) => {
-                                    setSelectedWard(v ?? null);
-                                    setWardFilter(v?.ward_number ?? '');
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Ward" />}
-                                clearOnEscape
-                            />
-                        </Box>
-                        <Button variant="contained" onClick={() => load({ page: 1 })}>Apply</Button>
-                    </Stack>
+                    <Box sx={{ mb: 2 }}>
+                        <TextField
+                            size="small"
+                            placeholder="Search by name..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon fontSize="small" />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ width: 280 }}
+                        />
+                    </Box>
 
                     {loading ? (
                         <Box sx={{ textAlign: 'center', py: 6 }}><CircularProgress /></Box>
                     ) : (
                         <>
-                            <UsersTable users={users} onView={(id) => navigate(`/admin/users/${id}`)} onEdit={(id) => navigate(`/admin/users/${id}/edit`)} onToggleBlock={handleToggleBlock} onDelete={(id) => handleDelete(id)} />
-
+                            <UsersTable
+                                users={users}
+                                onView={(id) => navigate(`/admin/users/${id}`)}
+                                onToggleBlock={handleToggleBlock}
+                            />
                             <Grid container justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
                                 <Grid item>
                                     <Typography variant="body2">Total: {total}</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Pagination count={Math.max(1, Math.ceil(total / pageSize))} page={page} onChange={handlePageChange} />
+                                    <Pagination count={Math.max(1, totalPages)} page={page} onChange={handlePageChange} />
                                 </Grid>
                             </Grid>
                         </>

@@ -16,7 +16,6 @@ const AdminAspirantListPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -40,14 +39,17 @@ const AdminAspirantListPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchAspirants(page, search);
-  }, [page, search, fetchAspirants]);
+    fetchAspirants(1, '');
+  }, [fetchAspirants]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1);
-    setSearch(searchInput);
-  };
+  // Debounce search — fires 400ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      fetchAspirants(1, search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openConfirm = (aspirant: AdminAspirant, action: 'block' | 'unblock') => {
     setActionError('');
@@ -86,12 +88,12 @@ const AdminAspirantListPage: React.FC = () => {
               {total} aspirant{total !== 1 ? 's' : ''} total
             </Typography>
           </Box>
-          <Box component="form" onSubmit={handleSearch}>
+          <Box>
             <TextField
               size="small"
               placeholder="Search by name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

@@ -40,10 +40,9 @@ const ReportsListPage: React.FC = () => {
                             <InputLabel id="status-filter-label">Status</InputLabel>
                             <Select labelId="status-filter-label" value={statusFilter} label="Status" onChange={(e) => setStatusFilter(e.target.value)}>
                                 <MenuItem value="">All</MenuItem>
-                                <MenuItem value="Pending">Pending</MenuItem>
-                                <MenuItem value="In Progress">In Progress</MenuItem>
-                                <MenuItem value="Resolved">Resolved</MenuItem>
-                                <MenuItem value="Rejected">Rejected</MenuItem>
+                                <MenuItem value="pending">Pending</MenuItem>
+                                <MenuItem value="resolved">Resolved</MenuItem>
+                                <MenuItem value="rejected">Rejected</MenuItem>
                             </Select>
                         </FormControl>
                         <Button variant="contained" sx={{ color: 'white' }} onClick={handleFilterApply}>Apply</Button>
