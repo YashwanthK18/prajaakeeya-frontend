@@ -204,7 +204,7 @@ const AdminAssemblyPage: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
+                      <TableCell>No</TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>State</TableCell>
                       <TableCell>Parliamentary</TableCell>
@@ -219,9 +219,9 @@ const AdminAssemblyPage: React.FC = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      items.map(it => (
+                      items.map((it, idx) => (
                         <TableRow key={it.id} hover>
-                          <TableCell>{it.id}</TableCell>
+                          <TableCell>{idx + 1}</TableCell>
                           <TableCell>{it.name}</TableCell>
                           <TableCell>{it.state}</TableCell>
                           <TableCell>{it.parliamentary}</TableCell>

@@ -162,7 +162,7 @@ const AdminParliamentaryPage: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
+                      <TableCell>No</TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>State</TableCell>
                       <TableCell align="right">Actions</TableCell>
