@@ -32,8 +32,21 @@ export interface AspirantPayload {
 }
 
 export const registerAspirant = (payload: AspirantPayload) => apiClient.post('/aspirants', payload);
-export const getAllAspirants = (page = 1, limit = 50) =>
-  apiClient.get('/aspirants/all', { params: { page, limit } });
+export const getAllAspirants = (page = 1, limit = 20, search?: string) =>
+  apiClient.get<{ data: AdminAspirant[]; total: number; page: number; limit: number; totalPages: number }>(
+    '/aspirants/all', { params: { page, limit, ...(search ? { search } : {}) } }
+  );
+
+export interface AdminAspirant {
+  id: number;
+  name: string;
+  party: string;
+  selfieUrl: string | null;
+  electionId: number;
+  electionName: string;
+  constituencyId: number;
+  constituencyName: string;
+}
 export const verifyAspirantRegistration = (verificationId: string, code: string) => 
   apiClient.post('/aspirants/verify-registration', { verificationId, code });
 export const resendAspirantRegistrationOtp = () => 

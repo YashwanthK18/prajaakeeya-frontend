@@ -30,6 +30,7 @@ import AdminAssemblyPage from "./pages/admin/AdminAssemblyPage";
 import AdminMunicipalityPage from "./pages/admin/AdminMunicipalityPage";
 import AdminGramaPanchayatPage from "./pages/admin/AdminGramaPanchayatPage";
 import AdminUploadSopPage from "./pages/admin/AdminUploadSopPage";
+import AdminAspirantListPage from "./pages/admin/AdminAspirantListPage";
 import UserLoginPage from "./pages/UserLoginPage";
 import UserRegisterPage from "./pages/UserRegisterPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
@@ -286,6 +287,7 @@ const App = () => {
               element={<AdminGramaPanchayatPage />}
             />
             <Route path="upload-sop" element={<AdminUploadSopPage />} />
+            <Route path="registered-aspirants" element={<AdminAspirantListPage />} />
             <Route path="/admin/users/:id" element={<AdminUserDetailsPage />} />
           </Route>
 

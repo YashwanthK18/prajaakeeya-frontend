@@ -54,17 +54,17 @@ const AdminLayout = () => {
 
   const navItems = useMemo(
     () => [
-      { label: t('adminDashboard.nav.createWard'), to: '/admin/wards/create', icon: <AddLocationIcon /> },
-      // { label: t('adminDashboard.nav.voterCount'), to: '/admin/voter-count', icon: <PeopleIcon /> }, // Temporarily commented out VoterCount nav bar
-      { label: t('adminDashboard.nav.users') ?? 'Users', to: '/admin/users', icon: <PeopleIcon /> },
-{ label: 'Voting Window', to: '/admin/voting-window', icon: <HowToVoteIcon /> },
-      { label: t('adminDashboard.nav.elections'), to: '/admin/elections', icon: <HowToVoteIcon /> },
-      { label: 'Municipalities', to: '/admin/municipalities', icon: <LocationCityIcon /> },
-      { label: 'Grama Panchayat', to: '/admin/grama-panchayat', icon: <GrassIcon /> },
-      { label: 'Parliament', to: '/admin/parliamentary', icon: <AddLocationIcon /> },
-      { label: 'Assembly', to: '/admin/assembly', icon: <AddLocationIcon /> },
-      { label: t('adminDashboard.nav.uploadSop', { defaultValue: 'Upload SOP' }), to: '/admin/upload-sop', icon: <DescriptionIcon /> },
-      { label: t('adminDashboard.nav.reports'), to: '/admin/reports', icon: <DescriptionIcon /> },
+      { label: 'User List', to: '/admin/users', icon: <PeopleIcon /> },
+      { label: 'Aspirant List', to: '/admin/registered-aspirants', icon: <PeopleIcon /> },
+      { label: 'Elections', to: '/admin/elections', icon: <HowToVoteIcon /> },
+      { label: 'Voting Window', to: '/admin/voting-window', icon: <HowToVoteIcon /> },
+      { label: 'Create Parliament', to: '/admin/parliamentary', icon: <AddLocationIcon /> },
+      { label: 'Create Assembly', to: '/admin/assembly', icon: <AddLocationIcon /> },
+      { label: 'Create Municipality', to: '/admin/municipalities', icon: <LocationCityIcon /> },
+      { label: 'Create Ward', to: '/admin/wards/create', icon: <AddLocationIcon /> },
+      { label: 'Create Grama Panchayat', to: '/admin/grama-panchayat', icon: <GrassIcon /> },
+      { label: 'Upload SOP', to: '/admin/upload-sop', icon: <DescriptionIcon /> },
+      { label: 'Reported List', to: '/admin/reports', icon: <DescriptionIcon /> },
     ],
     [t]
   );
