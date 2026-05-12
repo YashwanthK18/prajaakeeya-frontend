@@ -150,10 +150,34 @@ const UserDashboardPage = () => {
       color: 'secondary' as const
     },
     {
-      title: t('userDashboard.actions.candidates') || 'Aspirant List',
-      description: t('userDashboard.actions.candidatesDesc') || 'View all Aspirants in your ward',
-      icon: <img src={leaderImg} alt="aspirant list" width={30} height={30} />,
-      path: `/user/aspirantslist`,
+      title: t('userDashboard.actions.myLokSabhaAspirants') || 'My Lok Sabha Aspirants',
+      description: t('userDashboard.actions.myLokSabhaAspirantsDesc') || 'Aspirants in your Lok Sabha constituency',
+      icon: <img src={leaderImg} alt="lok sabha aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=lok_sabha`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const
+    },
+    {
+      title: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants',
+      description: t('userDashboard.actions.myStateAssemblyAspirantsDesc') || 'Aspirants in your Assembly constituency',
+      icon: <img src={managerImg} alt="state assembly aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=state_assembly`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const
+    },
+    {
+      title: t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Corporation Aspirants',
+      description: t('userDashboard.actions.myMunicipalCorporationAspirantsDesc') || 'Aspirants in your corporation ward',
+      icon: <img src={employeesImg} alt="municipal corporation aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=municipal_corporation`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const
+    },
+    {
+      title: t('userDashboard.actions.myGramPanchayatAspirants') || 'My Gram Panchayat Aspirants',
+      description: t('userDashboard.actions.myGramPanchayatAspirantsDesc') || 'Aspirants in your Gram Panchayat',
+      icon: <img src={meetImg} alt="gram panchayat aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=gram_panchayat`,
       variant: 'outlined' as const,
       color: 'secondary' as const
     },
