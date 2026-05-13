@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "ఆశావహులు",
       "subtitle": "మీ వార్డులో పోటీ చేస్తున్న ఆశావహులను కలవండి",
+      "missingConstituencyTitle": "ఆశావహులను చూడటానికి మీ {{type}} సెట్ చేయండి",
+      "missingConstituencyBody": "మీ ప్రాంతంలోని ఆశావహులను చూడటానికి మీ ప్రొఫైల్‌లో {{type}} ను నవీకరించండి.",
+      "updateProfileCta": "ప్రొఫైల్ నవీకరించండి",
       "goToDashboard": "హోమ్",
       "viewManifesto": "వివరాలను వీక్షించండి",
       "vote": "ఓటు వేయండి",

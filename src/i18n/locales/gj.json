@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "ઉમેદવારો",
       "subtitle": "તમારા વૉર્ડમાં ચૂંટણી લડી રહેલા ઉમેદવારોને મળો",
+      "missingConstituencyTitle": "ઇચ્છુકોને જોવા માટે તમારો {{type}} સેટ કરો",
+      "missingConstituencyBody": "તમારા વિસ્તારના ઇચ્છુકોને જોવા માટે પ્રોફાઇલમાં તમારો {{type}} અપડેટ કરો.",
+      "updateProfileCta": "પ્રોફાઇલ અપડેટ કરો",
       "goToDashboard": "હોમ",
       "viewManifesto": "વિગતો જુઓ",
       "vote": "મત આપો",

@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "उमेदवार",
       "subtitle": "तुमच्या प्रभागात निवडणूक लढवत असलेल्या उमेदवारांना भेटा",
+      "missingConstituencyTitle": "इच्छुक पाहण्यासाठी तुमचा {{type}} सेट करा",
+      "missingConstituencyBody": "तुमच्या भागातील इच्छुक पाहण्यासाठी प्रोफाईलमध्ये तुमचा {{type}} अपडेट करा.",
+      "updateProfileCta": "प्रोफाईल अपडेट करा",
       "goToDashboard": "मुख्यपृष्ठ",
       "viewManifesto": "तपशील पहा",
       "vote": "मत द्या",

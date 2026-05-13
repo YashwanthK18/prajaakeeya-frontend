@@ -1515,6 +1515,9 @@
     "wardCandidates": {
       "title": "ಆಕಾಂಕ್ಷಿಗಳು",
       "subtitle": "ನಿಮ್ಮ ಕ್ಷೇತ್ರಕ್ಕಾಗಿ ಸ್ಪರ್ಧಿಸುವ ಆಕಾಂಕ್ಷಿಗಳನ್ನು ಭೇಟಿ ಮಾಡಿ",
+      "missingConstituencyTitle": "ಆಕಾಂಕ್ಷಿಗಳನ್ನು ನೋಡಲು ನಿಮ್ಮ {{type}} ಹೊಂದಿಸಿ",
+      "missingConstituencyBody": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನಿಮ್ಮ {{type}} ಅನ್ನು ನವೀಕರಿಸಿ ನಿಮ್ಮ ಪ್ರದೇಶದ ಆಕಾಂಕ್ಷಿಗಳನ್ನು ನೋಡಿ.",
+      "updateProfileCta": "ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಿ",
       "goToDashboard": "ಹೋಮ್",
       "viewManifesto": "ವಿವರಗಳನ್ನು ನೋಡಿ",
       "vote": "ಪೋಲಿಂಗ್‌ ಮಾಡಿ",

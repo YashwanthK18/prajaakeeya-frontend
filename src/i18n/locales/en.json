@@ -1358,6 +1358,9 @@
     "wardCandidates": {
       "title": "Aspirants",
       "subtitle": "Meet the Aspirants contesting for your ward",
+      "missingConstituencyTitle": "Set your {{type}} to see aspirants",
+      "missingConstituencyBody": "Update your {{type}} in your profile to see aspirants in your area.",
+      "updateProfileCta": "Update Profile",
       "goToDashboard": "Home",
       "viewManifesto": "View Details",
       "vote": "Polling",

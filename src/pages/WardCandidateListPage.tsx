@@ -382,7 +382,8 @@ const WardCandidateListPage = () => {
 
   // ── Auto-filter mode: dashboard tiles deep-link with ?type=<election_type>
   // and we auto-load aspirants for the user's saved constituency for that type,
-  // hiding the filter dropdowns entirely.
+  // hiding the filter dropdowns entirely. If the user hasn't set a constituency
+  // for that type yet, we show a "Update your profile" empty state instead.
   const autoElectionType = searchParams.get('type');
   const autoUserConstituencyId = (() => {
     if (!user) return null;
@@ -399,7 +400,31 @@ const WardCandidateListPage = () => {
         return null;
     }
   })();
+  // True whenever the URL pins us to a specific election type (regardless of
+  // whether the user has the matching constituency saved).
+  const isAutoTypeMode = Boolean(autoElectionType);
+  // True only when we have both the type AND the user's stored ID — i.e. we can
+  // skip the filter UI and load aspirants directly.
   const autoFilterMode = Boolean(autoElectionType && autoUserConstituencyId);
+  // True when ?type= is present but the user hasn't saved that constituency.
+  const missingConstituencyForType = isAutoTypeMode && !autoUserConstituencyId;
+
+  // Friendly label for the missing-constituency message — falls back to the
+  // raw election type if no translation key matches.
+  const autoTypeLabelKey = (() => {
+    switch (autoElectionType) {
+      case 'lok_sabha':
+        return 'pages.constituencyOnboarding.step1Title';
+      case 'state_assembly':
+        return 'pages.constituencyOnboarding.step2Title';
+      case 'municipal_corporation':
+        return 'pages.constituencyOnboarding.step3Title';
+      case 'gram_panchayat':
+        return 'pages.constituencyOnboarding.step4Title';
+      default:
+        return '';
+    }
+  })();
 
   // ── Gram Panchayat filter state ──
   const [gpStates, setGpStates] = useState<string[]>([]);
@@ -1198,8 +1223,10 @@ const WardCandidateListPage = () => {
           </Stack>
         )}
 
-        {/* Filters are hidden in auto mode (dashboard tile deep-link with ?type=) */}
-        {!autoFilterMode && (
+        {/* Filters are hidden whenever the URL pins us to an election type
+            (dashboard tile deep-link with ?type=), regardless of whether the
+            user has a saved constituency for it. */}
+        {!isAutoTypeMode && (
         <>
         {/* GP / Village not found help message - mobile: above filters */}
         {isGramPanchayat && (
@@ -1490,6 +1517,84 @@ const WardCandidateListPage = () => {
           </Typography>
         )}
         </>
+        )}
+
+        {/* "Update your profile" empty state — shown when the dashboard tile
+            deep-linked us to an election type but the user hasn't saved their
+            constituency for it yet. */}
+        {missingConstituencyForType && (
+          <Box
+            sx={{
+              mt: { xs: 1, sm: 1.5 },
+              mb: { xs: 2, sm: 2 },
+              p: { xs: 3, sm: 4 },
+              borderRadius: 3,
+              textAlign: 'center',
+              border: `1px solid ${isDark ? 'rgba(245,168,0,0.28)' : 'rgba(245,168,0,0.42)'}`,
+              background: isDark
+                ? 'linear-gradient(135deg, rgba(245,168,0,0.08) 0%, rgba(224,32,16,0.04) 100%)'
+                : 'linear-gradient(135deg, rgba(245,168,0,0.10) 0%, rgba(224,32,16,0.04) 100%)',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: '1.05rem', sm: '1.2rem' },
+                fontWeight: 800,
+                color: isDark ? '#fff' : 'rgba(17,24,39,0.92)',
+                mb: 1,
+              }}
+            >
+              {t('pages.wardCandidates.missingConstituencyTitle', {
+                defaultValue: 'Set your {{type}} to see aspirants',
+                type: autoTypeLabelKey
+                  ? t(autoTypeLabelKey, { defaultValue: 'constituency' })
+                  : 'constituency',
+              })}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(17,24,39,0.7)',
+                mb: 2.5,
+                maxWidth: 480,
+                mx: 'auto',
+                lineHeight: 1.55,
+              }}
+            >
+              {t('pages.wardCandidates.missingConstituencyBody', {
+                defaultValue:
+                  'Update your {{type}} in your profile to see aspirants in your area.',
+                type: autoTypeLabelKey
+                  ? t(autoTypeLabelKey, { defaultValue: 'constituency' })
+                  : 'constituency',
+              })}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/user/complete-profile')}
+              sx={{
+                py: 1.1,
+                px: 3.5,
+                borderRadius: 2,
+                fontWeight: 800,
+                textTransform: 'none',
+                fontSize: '0.95rem',
+                color: '#fff',
+                background:
+                  'linear-gradient(135deg, #C8180A 0%, #E02010 100%)',
+                boxShadow: '0 6px 20px rgba(200,24,10,0.35)',
+                '&:hover': {
+                  background:
+                    'linear-gradient(135deg, #E02010 0%, #C8180A 100%)',
+                  boxShadow: '0 8px 26px rgba(200,24,10,0.5)',
+                },
+              }}
+            >
+              {t('pages.wardCandidates.updateProfileCta', {
+                defaultValue: 'Update Profile',
+              })}
+            </Button>
+          </Box>
         )}
 
         {/* Context strip — shows the currently active election + constituency */}

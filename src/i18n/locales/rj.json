@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "उम्मीदवार",
       "subtitle": "थारे वार्ड में चुनाव लड़ रिया उम्मीदवारां सूं मिलो",
+      "missingConstituencyTitle": "इच्छुकां नै देखण खातर थारो {{type}} सेट करो",
+      "missingConstituencyBody": "थारे इलाका रा इच्छुकां नै देखण खातर प्रोफ़ाइल में थारो {{type}} अपडेट करो।",
+      "updateProfileCta": "प्रोफ़ाइल अपडेट करो",
       "goToDashboard": "होम",
       "viewManifesto": "विवरण देखो",
       "vote": "वोट देवो",

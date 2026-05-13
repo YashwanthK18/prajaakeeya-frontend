@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "প্রার্থী",
       "subtitle": "আপনার ওয়ার্ডে প্রতিদ্বন্দ্বিতা করা প্রার্থীদের সাথে দেখা করুন",
+      "missingConstituencyTitle": "প্রার্থী দেখতে আপনার {{type}} সেট করুন",
+      "missingConstituencyBody": "আপনার এলাকার প্রার্থীদের দেখতে প্রোফাইলে আপনার {{type}} আপডেট করুন।",
+      "updateProfileCta": "প্রোফাইল আপডেট করুন",
       "goToDashboard": "হোম",
       "viewManifesto": "বিবরণ দেখুন",
       "vote": "ভোট দিন",

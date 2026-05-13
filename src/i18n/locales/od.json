@@ -1357,6 +1357,9 @@
     "wardCandidates": {
       "title": "ପ୍ରାର୍ଥୀ",
       "subtitle": "ଆପଣଙ୍କ ୱାର୍ଡରେ ପ୍ରତିଦ୍ୱନ୍ଦ୍ୱିତା କରୁଥିବା ପ୍ରାର୍ଥୀମାନଙ୍କୁ ଭେଟନ୍ତୁ",
+      "missingConstituencyTitle": "ଆକାଂକ୍ଷୀଙ୍କୁ ଦେଖିବାକୁ ଆପଣଙ୍କ {{type}} ସେଟ୍ କରନ୍ତୁ",
+      "missingConstituencyBody": "ଆପଣଙ୍କ ଅଞ୍ଚଳର ଆକାଂକ୍ଷୀଙ୍କୁ ଦେଖିବାକୁ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ {{type}} ଅପଡେଟ୍ କରନ୍ତୁ।",
+      "updateProfileCta": "ପ୍ରୋଫାଇଲ ଅପଡେଟ୍ କରନ୍ତୁ",
       "goToDashboard": "ହୋମ୍",
       "viewManifesto": "ବିବରଣୀ ଦେଖନ୍ତୁ",
       "vote": "ଭୋଟ୍ ଦିଅନ୍ତୁ",
