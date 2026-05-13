@@ -72,12 +72,44 @@ const UserConstituencyOnboardingPage = () => {
   const isDark = theme.palette.mode === "dark";
   const setAuth = useAuthStore((s) => s.setAuth);
   const token = useAuthStore((s) => s.token);
+  const fetchProfileFn = useAuthStore((s) => s.fetchProfile);
+
+  // Onboarding is only shown when all four constituency IDs are null.
+  // If the user already has at least one set, we skip straight to the dashboard.
+  const [checkingProfile, setCheckingProfile] = useState(true);
 
   const [stepIdx, setStepIdx] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>({});
   const [localBody, setLocalBody] = useState<LocalBody>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchProfileFn()
+      .catch(() => {
+        // Fall through; treat as no profile data and let the user fill it in.
+      })
+      .finally(() => {
+        if (cancelled) return;
+        const u = useAuthStore.getState().user;
+        const hasAny =
+          u != null &&
+          (u.lokSabhaConstituencyId != null ||
+            u.stateAssemblyConstituencyId != null ||
+            u.municipalCorporationConstituencyId != null ||
+            u.gramPanchayatConstituencyId != null);
+        if (hasAny) {
+          navigate("/user/dashboard", { replace: true });
+        } else {
+          setCheckingProfile(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ─── Source data ─────────────────────────────────────────
   const [, setElections] = useState<Election[]>([]);
@@ -843,6 +875,25 @@ const UserConstituencyOnboardingPage = () => {
         loadingGpVillages));
 
   const meta = stepMeta(currentStep);
+
+  if (checkingProfile) {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: isDark
+            ? "radial-gradient(ellipse at 50% 0%, #1a0a0a 0%, #0a0505 55%, #000 100%)"
+            : "radial-gradient(ellipse at 50% 0%, #fff8ee 0%, #f5efe2 55%, #ece4d2 100%)",
+        }}
+      >
+        <CircularProgress sx={{ color: BRAND.yellow }} />
+      </Box>
+    );
+  }
 
   return (
     <Box

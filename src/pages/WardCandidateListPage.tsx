@@ -995,6 +995,20 @@ const WardCandidateListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFilterMode, elections, autoUserConstituencyId, autoElectionType, loadAspirants]);
 
+  // In auto mode, once the constituency list loads for the chosen election type,
+  // match the user's stored ID so the context header can show the name.
+  // Works for elections whose constituencies come from fetchConstituencies(type)
+  // (lok_sabha, state_assembly, …). Municipal corporation & gram panchayat use
+  // scoped/cascading endpoints, so a name lookup isn't possible without extra
+  // calls — those fall through and only the election type is shown.
+  useEffect(() => {
+    if (!autoFilterMode || !autoUserConstituencyId) return;
+    if (!constituencies.length) return;
+    if (selectedConstituency?.id === autoUserConstituencyId) return;
+    const match = constituencies.find((c) => c.id === autoUserConstituencyId);
+    if (match) setSelectedConstituency(match);
+  }, [autoFilterMode, autoUserConstituencyId, constituencies, selectedConstituency]);
+
   // Fetch aspirants only when constituency changes (election change resets constituency to null first)
   useEffect(() => {
     if (selectedConstituency && selectedElectionId && !isGramPanchayat) {
@@ -1476,6 +1490,65 @@ const WardCandidateListPage = () => {
           </Typography>
         )}
         </>
+        )}
+
+        {/* Context strip — shows the currently active election + constituency */}
+        {selectedElection && (selectedConstituency || selectedGpVillage || selectedMunicipality) && (
+          <Box
+            sx={{
+              mt: { xs: 0.5, sm: 1 },
+              mb: { xs: 1, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 1, sm: 1.25 },
+              borderRadius: 2,
+              border: `1px solid ${isDark ? 'rgba(245,168,0,0.25)' : 'rgba(245,168,0,0.4)'}`,
+              background: isDark
+                ? 'linear-gradient(135deg, rgba(245,168,0,0.06) 0%, rgba(224,32,16,0.04) 100%)'
+                : 'linear-gradient(135deg, rgba(245,168,0,0.08) 0%, rgba(224,32,16,0.04) 100%)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: { xs: 1, sm: 1.5 },
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: BRAND.yellow,
+                px: 1,
+                py: 0.4,
+                borderRadius: 1,
+                border: `1px solid ${BRAND.yellow}`,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {selectedElection.name}
+            </Box>
+            <Typography
+              sx={{
+                fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                fontWeight: 700,
+                color: isDark ? '#fff' : 'rgba(17,24,39,0.92)',
+                lineHeight: 1.3,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {isGramPanchayat
+                ? selectedGpVillage?.villageName
+                : isMunicipalElection
+                  ? selectedConstituency
+                    ? `${selectedMunicipality?.name ?? ''}${selectedMunicipality?.name && selectedConstituency ? ' · ' : ''}${selectedConstituency.number ? `${selectedConstituency.number} - ` : ''}${selectedConstituency.name}`
+                    : selectedMunicipality?.name
+                  : selectedConstituency
+                    ? `${selectedConstituency.number ? `${selectedConstituency.number} - ` : ''}${selectedConstituency.name}`
+                    : ''}
+            </Typography>
+          </Box>
         )}
 
         {/* If server reports user has voted, show a green notice */}
