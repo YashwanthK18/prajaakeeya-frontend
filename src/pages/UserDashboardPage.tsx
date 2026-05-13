@@ -249,13 +249,38 @@ const UserDashboardPage = () => {
       variant: 'outlined' as const,
       color: 'secondary' as const,
     },
+    // Lok Sabha and State Assembly tiles are always shown. The aspirants list
+    // page nudges them to /user/complete-profile if the constituency isn't set.
     {
-      title: t('userDashboard.actions.candidates') || 'View Aspirants',
-      icon: <img src={leaderImg} alt="view aspirants" width={30} height={30} />,
-      path: `/user/aspirantslist`,
+      title: t('userDashboard.actions.myLokSabhaAspirants') || 'My Lok Sabha Aspirants',
+      icon: <img src={leaderImg} alt="lok sabha aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=lok_sabha`,
       variant: 'outlined' as const,
       color: 'secondary' as const,
     },
+    {
+      title: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants',
+      icon: <img src={managerImg} alt="state assembly aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=state_assembly`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const,
+    },
+    // Municipal Corporation / Gram Panchayat only render when the aspirant has
+    // saved one — a person belongs to exactly one local body, never both.
+    ...((user as any)?.municipalCorporationConstituencyId != null ? [{
+      title: t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Corporation Aspirants',
+      icon: <img src={employeesImg} alt="municipal corporation aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=municipal_corporation`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const,
+    }] : []),
+    ...((user as any)?.gramPanchayatConstituencyId != null ? [{
+      title: t('userDashboard.actions.myGramPanchayatAspirants') || 'My Gram Panchayat Aspirants',
+      icon: <img src={meetImg} alt="gram panchayat aspirants" width={30} height={30} />,
+      path: `/user/aspirantslist?type=gram_panchayat`,
+      variant: 'outlined' as const,
+      color: 'secondary' as const,
+    }] : []),
     {
       title: t('userDashboard.actions.voters') || 'View Voters',
       icon: <img src={king1Img} alt="voters" width={30} height={30} />,
