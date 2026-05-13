@@ -1671,7 +1671,10 @@ const WardCandidateListPage = () => {
           </Box>
         )}
 
-        {/* Context strip — shows the currently active election + constituency */}
+        {/* Context strip — shows the currently active election + constituency.
+            Stacks vertically on mobile so a long election name (e.g.
+            "Municipal Corporation (Corporator)") doesn't squeeze the ward
+            name into an awkward 3-line wrap. */}
         {selectedElection && (selectedConstituency || selectedGpVillage || selectedMunicipality) && (
           <Box
             sx={{
@@ -1685,36 +1688,39 @@ const WardCandidateListPage = () => {
                 ? 'linear-gradient(135deg, rgba(245,168,0,0.06) 0%, rgba(224,32,16,0.04) 100%)'
                 : 'linear-gradient(135deg, rgba(245,168,0,0.08) 0%, rgba(224,32,16,0.04) 100%)',
               display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: { xs: 1, sm: 1.5 },
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: { xs: 0.75, sm: 1.5 },
             }}
           >
             <Box
               component="span"
               sx={{
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 fontWeight: 700,
-                letterSpacing: '0.08em',
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 color: BRAND.yellow,
-                px: 1,
-                py: 0.4,
+                px: 0.9,
+                py: 0.3,
                 borderRadius: 1,
                 border: `1px solid ${BRAND.yellow}`,
-                whiteSpace: 'nowrap',
+                lineHeight: 1.2,
+                alignSelf: 'flex-start',
+                maxWidth: '100%',
               }}
             >
               {selectedElection.name}
             </Box>
             <Typography
               sx={{
-                fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                fontSize: { xs: '0.95rem', sm: '0.95rem' },
                 fontWeight: 700,
                 color: isDark ? '#fff' : 'rgba(17,24,39,0.92)',
                 lineHeight: 1.3,
                 flex: 1,
                 minWidth: 0,
+                wordBreak: 'break-word',
               }}
             >
               {isGramPanchayat
