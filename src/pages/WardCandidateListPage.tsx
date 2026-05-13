@@ -1024,8 +1024,21 @@ const WardCandidateListPage = () => {
     setSelectedConstituency(null);
     setSelectedGpVillage(null);
     setSelectedMunicipality(null);
+    setConstituencies([]);
     setCityConstituencies([]);
     setCandidates([]);
+
+    // Purge the cross-election-type filter cache. Otherwise a constituency
+    // saved during a previous tile visit (e.g. state_assembly → Aland) gets
+    // restored here by ID and shows the wrong name in the context strip.
+    try {
+      sessionStorage.removeItem(FILTER_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    // Suppress the saved-filter restoration in the existing election-change
+    // effect — we already know what to load from the user's profile.
+    filtersRestoredRef.current = true;
 
     lastAutoLoadedTypeRef.current = autoElectionType;
     setSelectedElectionId(election.id);
@@ -1035,17 +1048,19 @@ const WardCandidateListPage = () => {
 
   // In auto mode, once the constituency list loads for the chosen election type,
   // match the user's stored ID so the context header can show the name.
-  // Works for elections whose constituencies come from fetchConstituencies(type)
-  // (lok_sabha, state_assembly, …). Municipal corporation & gram panchayat use
-  // scoped/cascading endpoints, so a name lookup isn't possible without extra
-  // calls — those fall through and only the election type is shown.
+  // Only applies to election types whose constituencies come straight from
+  // fetchConstituencies(type) (lok_sabha, state_assembly, …). Municipal
+  // corporation & gram panchayat use scoped/cascading endpoints, so the
+  // `constituencies` array isn't populated for them and we skip — the name
+  // requires a backend lookup-by-id that doesn't currently exist.
   useEffect(() => {
     if (!autoFilterMode || !autoUserConstituencyId) return;
+    if (autoElectionType === 'municipal_corporation' || autoElectionType === 'gram_panchayat') return;
     if (!constituencies.length) return;
     if (selectedConstituency?.id === autoUserConstituencyId) return;
     const match = constituencies.find((c) => c.id === autoUserConstituencyId);
     if (match) setSelectedConstituency(match);
-  }, [autoFilterMode, autoUserConstituencyId, constituencies, selectedConstituency]);
+  }, [autoFilterMode, autoUserConstituencyId, autoElectionType, constituencies, selectedConstituency]);
 
   // Fetch aspirants only when constituency changes (election change resets constituency to null first)
   useEffect(() => {
