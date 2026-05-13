@@ -149,6 +149,9 @@ const UserDashboardPage = () => {
       variant: 'outlined' as const,
       color: 'secondary' as const
     },
+    // Lok Sabha and State Assembly tiles are always shown. If the user hasn't
+    // saved a constituency for the type yet, clicking lands them on the
+    // /user/aspirantslist "Update Profile" empty state.
     {
       title: t('userDashboard.actions.myLokSabhaAspirants') || 'My Lok Sabha Aspirants',
       description: t('userDashboard.actions.myLokSabhaAspirantsDesc') || 'Aspirants in your Lok Sabha constituency',
@@ -165,22 +168,26 @@ const UserDashboardPage = () => {
       variant: 'outlined' as const,
       color: 'secondary' as const
     },
-    {
+    // Municipal Corporation and Gram Panchayat tiles only render when the
+    // user has actually saved a constituency for that type. Since each user
+    // belongs to exactly one of these two (urban vs rural), hiding the
+    // irrelevant one keeps the dashboard clean.
+    ...((user as any)?.municipalCorporationConstituencyId != null ? [{
       title: t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Corporation Aspirants',
       description: t('userDashboard.actions.myMunicipalCorporationAspirantsDesc') || 'Aspirants in your corporation ward',
       icon: <img src={employeesImg} alt="municipal corporation aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=municipal_corporation`,
       variant: 'outlined' as const,
       color: 'secondary' as const
-    },
-    {
+    }] : []),
+    ...((user as any)?.gramPanchayatConstituencyId != null ? [{
       title: t('userDashboard.actions.myGramPanchayatAspirants') || 'My Gram Panchayat Aspirants',
       description: t('userDashboard.actions.myGramPanchayatAspirantsDesc') || 'Aspirants in your Gram Panchayat',
       icon: <img src={meetImg} alt="gram panchayat aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=gram_panchayat`,
       variant: 'outlined' as const,
       color: 'secondary' as const
-    },
+    }] : []),
     {
       title: t('userDashboard.actions.registerAspirant') || 'Register as Aspirant',
       description: t('userDashboard.actions.registerAspirantDesc') || 'Apply to become an aspirant in your ward',

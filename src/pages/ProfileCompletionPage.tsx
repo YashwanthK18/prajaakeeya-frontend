@@ -385,6 +385,55 @@ const ProfileCompletionPage = ({ hideLogout }: { hideLogout?: boolean } = {}) =>
         };
     }, [selectedMunicipality]);
 
+    // Pre-fill the Municipal Corporation cascade from the saved leaf ID by
+    // brute-forcing across municipalities (no `/constituencies/{id}` endpoint
+    // exists yet). Runs once after municipalities load. If the backend later
+    // returns the full constituency object on `/auth/me`, this can be removed.
+    const municipalResolvedRef = useRef(false);
+    useEffect(() => {
+        if (municipalResolvedRef.current) return;
+        if (selectedMunicipality || selectedCityWard) return;
+        const savedId = initialIdsRef.current.municipal;
+        if (savedId == null) return;
+        if (!municipalities.length) return;
+
+        municipalResolvedRef.current = true;
+        let cancelled = false;
+        setLoadingCityWards(true);
+        Promise.all(
+            municipalities.map((m) =>
+                fetchConstituenciesByScope(m.name)
+                    .then((resp) => ({
+                        m,
+                        wards: Array.isArray(resp.data)
+                            ? (resp.data as Constituency[])
+                            : [],
+                    }))
+                    .catch(() => ({ m, wards: [] as Constituency[] })),
+            ),
+        )
+            .then((results) => {
+                if (cancelled) return;
+                const match = results.find(({ wards }) =>
+                    wards.some((w) => w.id === savedId),
+                );
+                if (match) {
+                    setSelectedMunicipality(match.m);
+                    setCityWards(match.wards);
+                    setSelectedCityWard(
+                        match.wards.find((w) => w.id === savedId) ?? null,
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoadingCityWards(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [municipalities, selectedMunicipality, selectedCityWard]);
+
     // Gram Panchayat cascade — load states up front; the rest cascade on demand.
     useEffect(() => {
         let cancelled = false;
