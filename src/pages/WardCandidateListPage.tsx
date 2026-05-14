@@ -1323,24 +1323,16 @@ const WardCandidateListPage = () => {
 
         {/* 3-tab selector — drives `activeTab` which in turn sets the
             effective `autoElectionType`. Replaces the legacy filter dropdowns
-            below (which are kept in code, gated by !isAutoTypeMode). */}
+            below (which are kept in code, gated by !isAutoTypeMode). Styled to
+            match the Civic Issues page tab strip. */}
         <Box sx={{
-          p: { xs: 1, sm: 1.25 },
+          p: { xs: 1.5, sm: 2 },
           mb: 2.5,
           borderRadius: 3,
           border: `1px solid ${isDark ? 'rgba(245,168,0,0.18)' : 'rgba(245,168,0,0.28)'}`,
-          bgcolor: isDark
-            ? 'linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%)'
-            : 'linear-gradient(180deg, rgba(245,168,0,0.04) 0%, rgba(255,255,255,0) 100%)',
-          background: isDark
-            ? 'linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%)'
-            : 'linear-gradient(180deg, rgba(245,168,0,0.04) 0%, rgba(255,255,255,0) 100%)',
-          backdropFilter: 'blur(4px)',
-          boxShadow: isDark
-            ? '0 6px 18px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.04)'
-            : '0 6px 18px rgba(17,24,39,0.06)',
+          bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(17,24,39,0.02)',
         }}>
-          <Stack direction="row" spacing={{ xs: 0.75, sm: 1 }}>
+          <Stack direction="row" spacing={{ xs: 1, sm: 1.5 }}>
             {(() => {
               const hasMunicipal = (user as any)?.municipalCorporationConstituency?.id != null;
               const hasGp = (user as any)?.gramPanchayatConstituency != null;
@@ -1361,86 +1353,50 @@ const WardCandidateListPage = () => {
                   <Box
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    role="button"
-                    tabIndex={0}
                     sx={{
-                      position: 'relative',
                       flex: 1,
                       cursor: 'pointer',
-                      px: { xs: 0.75, sm: 1.25 },
-                      py: { xs: 1.25, sm: 1.5 },
+                      px: { xs: 1, sm: 1.5 },
+                      py: { xs: 1.4, sm: 1.6 },
                       borderRadius: 2,
                       border: isActive
-                        ? '1.5px solid transparent'
+                        ? '1.5px solid rgba(245,168,0,0.55)'
                         : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(17,24,39,0.08)'}`,
                       background: isActive
-                        ? 'linear-gradient(135deg, #F5A800 0%, #E02010 100%)'
-                        : isDark ? 'rgba(255,255,255,0.025)' : 'rgba(255,255,255,0.55)',
+                        ? 'linear-gradient(135deg, rgba(245,168,0,0.95) 0%, rgba(224,32,16,0.85) 100%)'
+                        : isDark
+                          ? 'rgba(255,255,255,0.03)'
+                          : 'rgba(17,24,39,0.02)',
                       color: isActive ? '#fff' : isDark ? 'rgba(255,255,255,0.78)' : 'rgba(17,24,39,0.78)',
-                      transform: isActive ? 'translateY(-1px)' : 'none',
-                      transition: 'transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-                      textAlign: 'center',
-                      minWidth: 0,
-                      boxShadow: isActive
-                        ? '0 8px 20px rgba(224,32,16,0.30), 0 2px 6px rgba(245,168,0,0.25)'
-                        : 'none',
+                      transition: 'all 0.18s ease',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 0.6,
-                      overflow: 'hidden',
+                      gap: 0.4,
+                      textAlign: 'center',
+                      minWidth: 0,
                       '&:hover': isActive
                         ? {}
                         : {
-                            borderColor: 'rgba(245,168,0,0.55)',
-                            background: isDark ? 'rgba(245,168,0,0.08)' : 'rgba(245,168,0,0.08)',
-                            transform: 'translateY(-1px)',
+                            borderColor: 'rgba(245,168,0,0.45)',
+                            background: isDark ? 'rgba(245,168,0,0.06)' : 'rgba(245,168,0,0.06)',
                           },
-                      '&:focus-visible': {
-                        outline: '2px solid rgba(245,168,0,0.65)',
-                        outlineOffset: 2,
-                      },
-                      // Active-tab underline accent
-                      '&::after': isActive
-                        ? {
-                            content: '""',
-                            position: 'absolute',
-                            left: '24%',
-                            right: '24%',
-                            bottom: 4,
-                            height: 3,
-                            borderRadius: 2,
-                            background: 'rgba(255,255,255,0.85)',
-                          }
-                        : {},
                     }}
                   >
-                    <Box sx={{
-                      width: { xs: 32, sm: 36 },
-                      height: { xs: 32, sm: 36 },
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: isActive
-                        ? 'rgba(255,255,255,0.18)'
-                        : isDark ? 'rgba(245,168,0,0.10)' : 'rgba(245,168,0,0.12)',
-                      mb: 0.2,
-                    }}>
-                      <Icon sx={{
-                        fontSize: { xs: 20, sm: 22 },
+                    <Icon
+                      sx={{
+                        fontSize: { xs: 24, sm: 26 },
                         color: isActive ? '#fff' : BRAND.yellow,
-                      }} />
-                    </Box>
-                    <Typography sx={{
-                      fontFamily: '"Baloo 2", cursive',
-                      fontWeight: 700,
-                      fontSize: { xs: '0.72rem', sm: '0.82rem' },
-                      lineHeight: 1.15,
-                      letterSpacing: '0.01em',
-                      textShadow: isActive ? '0 1px 2px rgba(0,0,0,0.18)' : 'none',
-                    }}>
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        fontFamily: '"Baloo 2", cursive',
+                        fontWeight: 700,
+                        fontSize: { xs: '0.78rem', sm: '0.88rem' },
+                        lineHeight: 1.15,
+                      }}
+                    >
                       {label}
                     </Typography>
                   </Box>
