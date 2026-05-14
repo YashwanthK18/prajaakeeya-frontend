@@ -1,17 +1,20 @@
+import { useEffect, useState, useCallback } from 'react';
 import { IconButton, Badge, SxProps, Theme } from '@mui/material';
 import {
   NotificationsNone as BellIcon,
   NotificationsActive as BellActiveIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useThemeStore from '../store/useThemeStore';
+import useAuthStore from '../store/useAuthStore';
 import { BRAND } from '../theme';
+import { getUnreadCount } from '../services/notificationService';
 
 const FF = "'Baloo 2', sans-serif";
 
 interface NotificationBellProps {
-  /** Unread count rendered on the badge. Defaults to 0 (no badge). */
+  /** When provided, overrides the live fetched unread count. */
   count?: number;
   /** Destination route. Defaults to `/user/notifications`. */
   to?: string;
@@ -19,15 +22,42 @@ interface NotificationBellProps {
 }
 
 export default function NotificationBell({
-  count = 0,
+  count: countOverride,
   to = '/user/notifications',
   sx,
 }: NotificationBellProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { mode } = useThemeStore();
+  const { isAuthenticated } = useAuthStore();
   const isDark = mode === 'dark';
 
+  const [liveCount, setLiveCount] = useState(0);
+
+  const fetchCount = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const { data } = await getUnreadCount();
+      setLiveCount(typeof data?.unreadCount === 'number' ? data.unreadCount : 0);
+    } catch {
+      // Silent — keep last known count rather than flashing the badge to zero on a transient error
+    }
+  }, [isAuthenticated]);
+
+  // Fetch on mount and every time the route changes (covers "user just left /notifications").
+  useEffect(() => {
+    fetchCount();
+  }, [fetchCount, location.pathname]);
+
+  // Refresh when the tab regains focus.
+  useEffect(() => {
+    const onFocus = () => fetchCount();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [fetchCount]);
+
+  const count = countOverride ?? liveCount;
   const accent = isDark ? BRAND.yellow : BRAND.saffron;
   const hasUnread = count > 0;
 

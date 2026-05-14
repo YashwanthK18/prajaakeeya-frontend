@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -12,6 +12,8 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  Skeleton,
+  Alert,
 } from '@mui/material';
 import {
   NotificationsNone as BellIcon,
@@ -19,6 +21,8 @@ import {
   Campaign as CampaignIcon,
   ReportProblem as IssueIcon,
   PersonAddAlt as AspirantIcon,
+  ChatBubbleOutline as ChatIcon,
+  EventAvailable as MeetingIcon,
   DoneAll as DoneAllIcon,
   DeleteOutline as DeleteIcon,
   ArrowBack as ArrowBackIcon,
@@ -27,63 +31,106 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { BRAND } from '../theme';
+import { listNotifications, ApiNotification } from '../services/notificationService';
 
 const FF = "'Baloo 2', sans-serif";
 
-type Kind = 'vote' | 'issue' | 'aspirant' | 'announcement';
+type Kind = 'vote' | 'issue' | 'aspirant' | 'announcement' | 'chat' | 'meeting';
 type Bucket = 'today' | 'yesterday' | 'earlier';
 
-interface NotificationItem {
-  id: string;
+interface UiNotification {
+  id: number;
   kind: Kind;
   title: string;
   body?: string;
   time: string;
   bucket: Bucket;
-  read?: boolean;
+  read: boolean;
   href?: string;
 }
 
-const SAMPLE: NotificationItem[] = [
-  {
-    id: 'n1',
-    kind: 'vote',
-    title: 'Ward voting window opens tomorrow',
-    body: 'Cast your vote for ward aspirants between 9 AM – 6 PM.',
-    time: '2h ago',
-    bucket: 'today',
-    href: '/user/vote',
-  },
-  {
-    id: 'n2',
-    kind: 'issue',
-    title: 'New public issue near you',
-    body: 'Pothole reported on MG Road — 3 citizens upvoted.',
-    time: '5h ago',
-    bucket: 'today',
-    href: '/user/civic-issues',
-  },
-  {
-    id: 'n3',
-    kind: 'aspirant',
-    title: 'A new aspirant joined your ward',
-    body: 'Tap to view profile and manifesto.',
-    time: 'Yesterday, 6:14 PM',
-    bucket: 'yesterday',
-    read: true,
-    href: '/user/aspirantslist',
-  },
-  {
-    id: 'n4',
-    kind: 'announcement',
-    title: 'Welcome to Prajaakeeya',
-    body: 'Get started by completing your profile.',
-    time: '3 days ago',
-    bucket: 'earlier',
-    read: true,
-    href: '/user/complete-profile',
-  },
-];
+const typeToKind = (type: string): Kind => {
+  switch (type) {
+    case 'voting_window':
+      return 'vote';
+    case 'civic_issue':
+      return 'issue';
+    case 'new_aspirant':
+      return 'aspirant';
+    case 'chat_message':
+      return 'chat';
+    case 'meeting':
+    case 'visit':
+      return 'meeting';
+    case 'announcement':
+    default:
+      return 'announcement';
+  }
+};
+
+const hrefFor = (n: ApiNotification): string | undefined => {
+  switch (n.type) {
+    case 'voting_window':
+      return '/user/vote';
+    case 'civic_issue':
+      return '/user/civic-issues';
+    case 'new_aspirant':
+      return n.aspirantId ? `/user/aspirants/${n.aspirantId}/view` : '/user/aspirantslist';
+    case 'chat_message':
+      return n.aspirantId ? `/user/chat/${n.aspirantId}` : undefined;
+    case 'meeting':
+      return '/user/dashboard/meetings';
+    default:
+      return undefined;
+  }
+};
+
+const startOfDay = (ts: number) => {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+};
+
+const bucketFor = (ts: number): Bucket => {
+  const today = startOfDay(Date.now());
+  const yesterday = today - 24 * 60 * 60 * 1000;
+  const day = startOfDay(ts);
+  if (day === today) return 'today';
+  if (day === yesterday) return 'yesterday';
+  return 'earlier';
+};
+
+const relativeTime = (ts: number): string => {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24 && bucketFor(ts) === 'today') return `${hrs}h ago`;
+  const date = new Date(ts);
+  const dateStr = date.toLocaleString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  if (bucketFor(ts) === 'yesterday') return `Yesterday, ${dateStr}`;
+  return date.toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+const toUiNotification = (n: ApiNotification): UiNotification => ({
+  id: n.id,
+  kind: typeToKind(n.type),
+  title: n.title,
+  body: n.body ?? undefined,
+  time: relativeTime(n.createdAt),
+  bucket: bucketFor(n.createdAt),
+  read: n.isRead,
+  href: hrefFor(n),
+});
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
@@ -91,8 +138,10 @@ export default function NotificationsPage() {
   const isDark = theme.palette.mode === 'dark';
   const { t } = useTranslation();
 
-  const [items, setItems] = useState<NotificationItem[]>(SAMPLE);
+  const [items, setItems] = useState<UiNotification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const accent = isDark ? BRAND.yellow : BRAND.saffron;
   const textPrimary = theme.palette.text.primary;
@@ -120,7 +169,35 @@ export default function NotificationsPage() {
       tint: BRAND.saffron,
       label: t('notifications.kinds.announcement') || 'Announcement',
     },
+    chat: {
+      icon: <ChatIcon fontSize="small" />,
+      tint: BRAND.blue,
+      label: t('notifications.kinds.chat') || 'Chat',
+    },
+    meeting: {
+      icon: <MeetingIcon fontSize="small" />,
+      tint: BRAND.brown,
+      label: t('notifications.kinds.meeting') || 'Meeting',
+    },
   };
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await listNotifications({ page: 1, limit: 50 });
+      const ui = (data?.data ?? []).map(toUiNotification);
+      setItems(ui);
+    } catch (e: any) {
+      setError(e?.response?.data?.message || e?.message || 'Failed to load notifications.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const unreadCount = useMemo(() => items.filter((n) => !n.read).length, [items]);
   const visible = useMemo(
@@ -129,7 +206,7 @@ export default function NotificationsPage() {
   );
 
   const grouped = useMemo(() => {
-    const map: Record<Bucket, NotificationItem[]> = { today: [], yesterday: [], earlier: [] };
+    const map: Record<Bucket, UiNotification[]> = { today: [], yesterday: [], earlier: [] };
     for (const n of visible) map[n.bucket].push(n);
     return map;
   }, [visible]);
@@ -137,7 +214,7 @@ export default function NotificationsPage() {
   const handleMarkAll = () => setItems((prev) => prev.map((n) => ({ ...n, read: true })));
   const handleClear = () => setItems([]);
 
-  const handleClickItem = (n: NotificationItem) => {
+  const handleClickItem = (n: UiNotification) => {
     setItems((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
     if (n.href) navigate(n.href);
   };
@@ -235,7 +312,7 @@ export default function NotificationsPage() {
             <Button
               size="small"
               variant="outlined"
-              disabled={unreadCount === 0}
+              disabled={unreadCount === 0 || loading}
               startIcon={<DoneAllIcon sx={{ fontSize: 18 }} />}
               onClick={handleMarkAll}
               sx={{
@@ -258,7 +335,7 @@ export default function NotificationsPage() {
               <span>
                 <IconButton
                   size="small"
-                  disabled={items.length === 0}
+                  disabled={items.length === 0 || loading}
                   onClick={handleClear}
                   sx={{
                     color: subText,
@@ -306,8 +383,29 @@ export default function NotificationsPage() {
         </ToggleButton>
       </ToggleButtonGroup>
 
+      {/* Error */}
+      {error && (
+        <Alert severity="error" sx={{ fontFamily: FF }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Loading skeleton */}
+      {loading && (
+        <Stack spacing={1.2}>
+          {[0, 1, 2].map((i) => (
+            <Skeleton
+              key={i}
+              variant="rounded"
+              height={92}
+              sx={{ borderRadius: 3, bgcolor: isDark ? 'rgba(255,255,255,0.05)' : undefined }}
+            />
+          ))}
+        </Stack>
+      )}
+
       {/* Empty state */}
-      {visible.length === 0 && (
+      {!loading && !error && visible.length === 0 && (
         <Box
           sx={{
             textAlign: 'center',
@@ -344,165 +442,168 @@ export default function NotificationsPage() {
       )}
 
       {/* Grouped list */}
-      {(['today', 'yesterday', 'earlier'] as Bucket[]).map((bucket) => {
-        const list = grouped[bucket];
-        if (!list || list.length === 0) return null;
-        return (
-          <Box key={bucket}>
-            <Typography
-              sx={{
-                fontFamily: FF,
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                letterSpacing: '.08em',
-                textTransform: 'uppercase',
-                color: subText,
-                mb: 1,
-              }}
-            >
-              {sectionLabel(bucket)}
-            </Typography>
+      {!loading &&
+        !error &&
+        (['today', 'yesterday', 'earlier'] as Bucket[]).map((bucket) => {
+          const list = grouped[bucket];
+          if (!list || list.length === 0) return null;
+          return (
+            <Box key={bucket}>
+              <Typography
+                sx={{
+                  fontFamily: FF,
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  letterSpacing: '.08em',
+                  textTransform: 'uppercase',
+                  color: subText,
+                  mb: 1,
+                }}
+              >
+                {sectionLabel(bucket)}
+              </Typography>
 
-            <Stack spacing={1.2}>
-              {list.map((n) => {
-                const meta = KIND_META[n.kind];
-                return (
-                  <motion.div
-                    key={n.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                  >
-                    <Box
-                      onClick={() => handleClickItem(n)}
-                      sx={{
-                        position: 'relative',
-                        display: 'flex',
-                        gap: 1.4,
-                        p: { xs: 1.4, sm: 1.8 },
-                        borderRadius: 3,
-                        cursor: 'pointer',
-                        border: `1px solid ${
-                          !n.read
-                            ? isDark
-                              ? 'rgba(245,168,0,0.32)'
-                              : 'rgba(245,168,0,0.42)'
-                            : borderFaint
-                        }`,
-                        background: !n.read
-                          ? isDark
-                            ? 'linear-gradient(135deg, rgba(245,168,0,0.08), rgba(200,24,10,0.05))'
-                            : 'linear-gradient(135deg, rgba(245,168,0,0.08), rgba(200,24,10,0.04))'
-                          : isDark
-                            ? 'rgba(255,255,255,0.02)'
-                            : '#fff',
-                        transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          borderColor: accent,
-                          boxShadow: isDark
-                            ? '0 10px 24px rgba(0,0,0,0.35)'
-                            : '0 8px 22px rgba(17,24,39,0.08)',
-                        },
-                      }}
+              <Stack spacing={1.2}>
+                {list.map((n) => {
+                  const meta = KIND_META[n.kind];
+                  return (
+                    <motion.div
+                      key={n.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
                     >
-                      {!n.read && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 14,
-                            right: 14,
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: BRAND.red,
-                            boxShadow: `0 0 0 4px ${isDark ? 'rgba(200,24,10,0.18)' : 'rgba(200,24,10,0.14)'}`,
-                          }}
-                        />
-                      )}
-                      <Avatar
+                      <Box
+                        onClick={() => handleClickItem(n)}
                         sx={{
-                          width: 42,
-                          height: 42,
-                          flexShrink: 0,
-                          bgcolor: isDark ? `${meta.tint}22` : `${meta.tint}1f`,
-                          color: meta.tint,
-                          border: `1px solid ${meta.tint}55`,
+                          position: 'relative',
+                          display: 'flex',
+                          gap: 1.4,
+                          p: { xs: 1.4, sm: 1.8 },
+                          borderRadius: 3,
+                          cursor: 'pointer',
+                          border: `1px solid ${
+                            !n.read
+                              ? isDark
+                                ? 'rgba(245,168,0,0.32)'
+                                : 'rgba(245,168,0,0.42)'
+                              : borderFaint
+                          }`,
+                          background: !n.read
+                            ? isDark
+                              ? 'linear-gradient(135deg, rgba(245,168,0,0.08), rgba(200,24,10,0.05))'
+                              : 'linear-gradient(135deg, rgba(245,168,0,0.08), rgba(200,24,10,0.04))'
+                            : isDark
+                              ? 'rgba(255,255,255,0.02)'
+                              : '#fff',
+                          transition:
+                            'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            borderColor: accent,
+                            boxShadow: isDark
+                              ? '0 10px 24px rgba(0,0,0,0.35)'
+                              : '0 8px 22px rgba(17,24,39,0.08)',
+                          },
                         }}
                       >
-                        {meta.icon}
-                      </Avatar>
-                      <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.8,
-                            flexWrap: 'wrap',
-                            mb: 0.3,
-                          }}
-                        >
-                          <Chip
-                            size="small"
-                            label={meta.label}
+                        {!n.read && (
+                          <Box
                             sx={{
-                              height: 18,
-                              fontFamily: FF,
-                              fontWeight: 700,
-                              fontSize: '0.62rem',
-                              letterSpacing: '.04em',
-                              textTransform: 'uppercase',
-                              bgcolor: `${meta.tint}1a`,
-                              color: meta.tint,
-                              border: `1px solid ${meta.tint}55`,
+                              position: 'absolute',
+                              top: 14,
+                              right: 14,
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: BRAND.red,
+                              boxShadow: `0 0 0 4px ${isDark ? 'rgba(200,24,10,0.18)' : 'rgba(200,24,10,0.14)'}`,
                             }}
                           />
-                          <Typography
-                            sx={{
-                              fontFamily: FF,
-                              fontSize: '0.72rem',
-                              fontWeight: 600,
-                              color: subText,
-                            }}
-                          >
-                            • {n.time}
-                          </Typography>
-                        </Box>
-                        <Typography
+                        )}
+                        <Avatar
                           sx={{
-                            fontFamily: FF,
-                            fontWeight: n.read ? 600 : 800,
-                            fontSize: '0.95rem',
-                            lineHeight: 1.3,
-                            color: textPrimary,
+                            width: 42,
+                            height: 42,
+                            flexShrink: 0,
+                            bgcolor: isDark ? `${meta.tint}22` : `${meta.tint}1f`,
+                            color: meta.tint,
+                            border: `1px solid ${meta.tint}55`,
                           }}
                         >
-                          {n.title}
-                        </Typography>
-                        {n.body && (
+                          {meta.icon}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.8,
+                              flexWrap: 'wrap',
+                              mb: 0.3,
+                            }}
+                          >
+                            <Chip
+                              size="small"
+                              label={meta.label}
+                              sx={{
+                                height: 18,
+                                fontFamily: FF,
+                                fontWeight: 700,
+                                fontSize: '0.62rem',
+                                letterSpacing: '.04em',
+                                textTransform: 'uppercase',
+                                bgcolor: `${meta.tint}1a`,
+                                color: meta.tint,
+                                border: `1px solid ${meta.tint}55`,
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                fontFamily: FF,
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                color: subText,
+                              }}
+                            >
+                              • {n.time}
+                            </Typography>
+                          </Box>
                           <Typography
                             sx={{
                               fontFamily: FF,
-                              fontSize: '0.84rem',
-                              color: subText,
-                              mt: 0.4,
-                              lineHeight: 1.4,
+                              fontWeight: n.read ? 600 : 800,
+                              fontSize: '0.95rem',
+                              lineHeight: 1.3,
+                              color: textPrimary,
                             }}
                           >
-                            {n.body}
+                            {n.title}
                           </Typography>
-                        )}
+                          {n.body && (
+                            <Typography
+                              sx={{
+                                fontFamily: FF,
+                                fontSize: '0.84rem',
+                                color: subText,
+                                mt: 0.4,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {n.body}
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                  </motion.div>
-                );
-              })}
-            </Stack>
-          </Box>
-        );
-      })}
+                    </motion.div>
+                  );
+                })}
+              </Stack>
+            </Box>
+          );
+        })}
 
-      {items.length > 0 && (
+      {!loading && !error && items.length > 0 && (
         <Divider sx={{ borderColor: borderFaint, opacity: 0.6 }}>
           <Typography
             sx={{

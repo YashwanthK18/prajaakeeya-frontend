@@ -1734,7 +1734,9 @@
       "vote": "Voting",
       "issue": "Public Issue",
       "aspirant": "Aspirant",
-      "announcement": "Announcement"
+      "announcement": "Announcement",
+      "chat": "Chat",
+      "meeting": "Meeting"
     }
   },
   "civicIssues": {

@@ -167,7 +167,7 @@ const UserLayout = () => {
               />
 
               {/* Notifications bell — opens /user/notifications */}
-              <NotificationBell count={2} />
+              <NotificationBell />
 
               <Box sx={{ width: { xs: 4, sm: 8 } }} />
 
