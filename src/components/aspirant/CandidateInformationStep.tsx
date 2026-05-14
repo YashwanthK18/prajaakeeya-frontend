@@ -477,18 +477,12 @@ const CandidateInformationStep = ({
   })();
 
   // Push the resolved electionId + constituencyId into the form whenever the
-  // tab, elections list, or saved user data changes.
+  // tab, elections list, or saved user data changes. `shouldValidate: true`
+  // re-runs the validator so a stale "required" error from before the value
+  // landed gets cleared.
   useEffect(() => {
-    if (activeElection?.id != null) {
-      setValue('electionId', activeElection.id);
-    } else {
-      setValue('electionId', '');
-    }
-    if (activeConstituencyForUser?.id != null) {
-      setValue('constituencyId', activeConstituencyForUser.id);
-    } else {
-      setValue('constituencyId', '');
-    }
+    setValue('electionId', activeElection?.id ?? '', { shouldValidate: true });
+    setValue('constituencyId', activeConstituencyForUser?.id ?? '', { shouldValidate: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, activeElection?.id, activeConstituencyForUser?.id]);
 
