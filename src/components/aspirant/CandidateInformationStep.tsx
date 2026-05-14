@@ -490,11 +490,21 @@ const CandidateInformationStep = ({
 
   // Push the resolved electionId + constituencyId into the form whenever the
   // tab, elections list, or saved user data changes. `shouldValidate: true`
-  // re-runs the validator so a stale "required" error from before the value
-  // landed gets cleared.
+  // re-runs the validator and `clearErrors` removes any stale "required"
+  // error left over from a prior submit attempt.
   useEffect(() => {
-    setValue('electionId', activeElection?.id ?? '', { shouldValidate: true });
-    setValue('constituencyId', activeConstituencyForUser?.id ?? '', { shouldValidate: true });
+    if (activeElection?.id != null) {
+      setValue('electionId', activeElection.id, { shouldValidate: true });
+      clearErrors?.('electionId');
+    } else {
+      setValue('electionId', '', { shouldValidate: true });
+    }
+    if (activeConstituencyForUser?.id != null) {
+      setValue('constituencyId', activeConstituencyForUser.id, { shouldValidate: true });
+      clearErrors?.('constituencyId');
+    } else {
+      setValue('constituencyId', '', { shouldValidate: true });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, activeElection?.id, activeConstituencyForUser?.id]);
 
@@ -820,7 +830,7 @@ const CandidateInformationStep = ({
               </Box>
             )}
 
-            {errors.constituencyId && !missing && (
+            {errors.constituencyId && missing && (
               <Typography sx={{ color: 'rgba(255,80,80,0.85)', fontSize: '0.72rem', fontFamily: FF }}>
                 {t((errors.constituencyId as any).message || 'validation.required')}
               </Typography>
