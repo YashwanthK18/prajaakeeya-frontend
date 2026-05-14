@@ -529,6 +529,34 @@ const ProfileCompletionPage = ({ hideLogout }: { hideLogout?: boolean } = {}) =>
             .finally(() => setLoadingGp(false));
     }, [selectedGpState, selectedGpDistrict, selectedGpTaluk, selectedGpGram]);
 
+    // Pre-fill the Gram Panchayat cascade from the saved nested object on
+    // /auth/me. The GP nested shape carries the full hierarchy
+    // (state/district/taluk/gpName + srNo + villageName), so we seed each
+    // upper-level string directly. The existing cascade effects fetch the
+    // list for the next level, and the village picker waits for its options
+    // to load, then matches by villageName (or srNo as fallback).
+    const gpResolvedRef = useRef(false);
+    const savedGp = (user as any)?.gramPanchayatConstituency ?? null;
+    useEffect(() => {
+        if (gpResolvedRef.current) return;
+        if (!savedGp || !savedGp.srNo) return;
+        gpResolvedRef.current = true;
+        if (savedGp.state) setSelectedGpState(savedGp.state);
+        if (savedGp.district) setSelectedGpDistrict(savedGp.district);
+        if (savedGp.taluk) setSelectedGpTaluk(savedGp.taluk);
+        if (savedGp.gpName) setSelectedGpGram(savedGp.gpName);
+    }, [savedGp]);
+    // Once the villages list arrives for the saved GP, select the matching
+    // village so the Village dropdown renders the saved name.
+    useEffect(() => {
+        if (!savedGp || selectedGpVillage) return;
+        if (!gpVillages.length) return;
+        const match = gpVillages.find(
+            (v) => v.villageName === savedGp.villageName || v.id === String(savedGp.srNo),
+        );
+        if (match) setSelectedGpVillage(match);
+    }, [gpVillages, savedGp, selectedGpVillage]);
+
     // Delete profile picture
     const handleDeletePhoto = async () => {
         setPhotoMenuAnchor(null);
