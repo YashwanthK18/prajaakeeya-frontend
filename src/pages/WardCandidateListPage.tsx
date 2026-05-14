@@ -380,11 +380,29 @@ const WardCandidateListPage = () => {
   const isMunicipalElection = selectedElection?.type === 'municipal_corporation';
   const isGramPanchayat = selectedElection?.type === 'gram_panchayat';
 
-  // ── Auto-filter mode: dashboard tiles deep-link with ?type=<election_type>
-  // and we auto-load aspirants for the user's saved constituency for that type,
-  // hiding the filter dropdowns entirely. If the user hasn't set a constituency
-  // for that type yet, we show a "Update your profile" empty state instead.
-  const autoElectionType = searchParams.get('type');
+  // ── 3-tab selector replaces the legacy filter dropdowns. Each tab maps to
+  // one election type and auto-loads aspirants for the user's saved
+  // constituency for that type. The original filter UI is kept in place below
+  // but gated by `!isAutoTypeMode` (which is now always false, since the tab
+  // selector always sets an `autoElectionType`).
+  type AspirantTab = 'mp' | 'mla' | 'ward_panchayat';
+  const tabToElectionType = (tab: AspirantTab): string => {
+    if (tab === 'mp') return 'lok_sabha';
+    if (tab === 'mla') return 'state_assembly';
+    // ward_panchayat tab — pick whichever local body the user has saved.
+    if ((user as any)?.municipalCorporationConstituency?.id != null) return 'municipal_corporation';
+    if ((user as any)?.gramPanchayatConstituency != null) return 'gram_panchayat';
+    return 'municipal_corporation';
+  };
+  const initialTabFromUrl: AspirantTab = (() => {
+    const u = searchParams.get('type');
+    if (u === 'lok_sabha') return 'mp';
+    if (u === 'state_assembly') return 'mla';
+    if (u === 'municipal_corporation' || u === 'gram_panchayat') return 'ward_panchayat';
+    return 'mp';
+  })();
+  const [activeTab, setActiveTab] = useState<AspirantTab>(initialTabFromUrl);
+  const autoElectionType = tabToElectionType(activeTab);
   const autoUserConstituencyId = (() => {
     if (!user) return null;
     switch (autoElectionType) {
@@ -1299,9 +1317,77 @@ const WardCandidateListPage = () => {
           </Stack>
         )}
 
-        {/* Filters are hidden whenever the URL pins us to an election type
-            (dashboard tile deep-link with ?type=), regardless of whether the
-            user has a saved constituency for it. */}
+        {/* 3-tab selector — drives `activeTab` which in turn sets the
+            effective `autoElectionType`. Replaces the legacy filter dropdowns
+            below (which are kept in code, gated by !isAutoTypeMode). */}
+        <Box sx={{
+          p: { xs: 1.5, sm: 2 },
+          mb: 2,
+          borderRadius: 3,
+          border: `1px solid ${isDark ? 'rgba(245,168,0,0.18)' : 'rgba(245,168,0,0.28)'}`,
+          bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(17,24,39,0.02)',
+        }}>
+          <Stack direction="row" spacing={{ xs: 1, sm: 1.5 }}>
+            {(() => {
+              const hasMunicipal = (user as any)?.municipalCorporationConstituency?.id != null;
+              const hasGp = (user as any)?.gramPanchayatConstituency != null;
+              const wardTabLabel = hasMunicipal
+                ? (t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Aspirants')
+                : hasGp
+                  ? (t('userDashboard.actions.myGramPanchayatAspirants') || 'My Gram Panchayat Aspirants')
+                  : (t('pages.wardCandidates.tabWardPanchayat') || 'My Ward / Panchayat Aspirants');
+              const tabs: { key: AspirantTab; label: string }[] = [
+                { key: 'mp', label: t('userDashboard.actions.myLokSabhaAspirants') || 'My Lok Sabha Aspirants' },
+                { key: 'mla', label: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants' },
+                { key: 'ward_panchayat', label: wardTabLabel },
+              ];
+              return tabs.map(({ key, label }) => {
+                const isActive = activeTab === key;
+                return (
+                  <Box
+                    key={key}
+                    onClick={() => setActiveTab(key)}
+                    sx={{
+                      flex: 1,
+                      cursor: 'pointer',
+                      px: { xs: 1, sm: 1.5 },
+                      py: { xs: 1.2, sm: 1.4 },
+                      borderRadius: 2,
+                      border: isActive
+                        ? '1.5px solid rgba(245,168,0,0.55)'
+                        : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(17,24,39,0.08)'}`,
+                      background: isActive
+                        ? 'linear-gradient(135deg, rgba(245,168,0,0.95) 0%, rgba(224,32,16,0.85) 100%)'
+                        : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(17,24,39,0.02)',
+                      color: isActive ? '#fff' : isDark ? 'rgba(255,255,255,0.78)' : 'rgba(17,24,39,0.78)',
+                      transition: 'all 0.18s ease',
+                      textAlign: 'center',
+                      minWidth: 0,
+                      '&:hover': isActive
+                        ? {}
+                        : {
+                            borderColor: 'rgba(245,168,0,0.45)',
+                            background: isDark ? 'rgba(245,168,0,0.06)' : 'rgba(245,168,0,0.06)',
+                          },
+                    }}
+                  >
+                    <Typography sx={{
+                      fontFamily: '"Baloo 2", cursive',
+                      fontWeight: 700,
+                      fontSize: { xs: '0.78rem', sm: '0.88rem' },
+                      lineHeight: 1.2,
+                    }}>
+                      {label}
+                    </Typography>
+                  </Box>
+                );
+              });
+            })()}
+          </Stack>
+        </Box>
+
+        {/* Legacy filter UI — preserved but never renders now that the tab
+            selector above always sets `autoElectionType`. */}
         {!isAutoTypeMode && (
         <>
         {/* GP / Village not found help message - mobile: above filters */}
