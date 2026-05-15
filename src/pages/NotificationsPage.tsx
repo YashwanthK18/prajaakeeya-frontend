@@ -316,23 +316,6 @@ export default function NotificationsPage() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Tooltip title={t('common.back') || 'Back'}>
-              <IconButton
-                onClick={() => navigate(-1)}
-                size="small"
-                sx={{
-                  display: { xs: 'inline-flex', sm: 'none' },
-                  color: accent,
-                  border: `1px solid ${borderFaint}`,
-                  borderRadius: 2,
-                  p: 0.8,
-                  background: 'linear-gradient(135deg,rgba(200,24,10,.10),rgba(245,168,0,.10))',
-                }}
-              >
-                <ArrowBackIcon sx={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
-
             <Box>
               <Typography
                 variant="h4"
@@ -416,7 +399,7 @@ export default function NotificationsPage() {
               fontWeight: 700,
               fontSize: '0.82rem',
               textTransform: 'none',
-              borderRadius: 50,
+              borderRadius: 2,
               px: 2,
               py: 0.7,
               color: accent,
@@ -447,7 +430,7 @@ export default function NotificationsPage() {
               fontWeight: 700,
               fontSize: '0.82rem',
               textTransform: 'none',
-              borderRadius: 50,
+              borderRadius: 2,
               px: 2,
               py: 0.7,
               color: accent,
