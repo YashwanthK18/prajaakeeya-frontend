@@ -329,9 +329,9 @@ const UserRegisterPage = () => {
                       }}
                     >
                       {t("pages.register.consentCombined")
-                        .split(/(Privacy Policy(?: & Terms)?|Terms)/)
+                        .split(/(Privacy Policy|Terms)/)
                         .map((part, i) => {
-                          if (part === "Privacy Policy & Terms" || part === "Privacy Policy") {
+                          if (part === "Privacy Policy") {
                             return (
                               <Box
                                 key={i}
