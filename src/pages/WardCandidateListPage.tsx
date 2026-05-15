@@ -503,6 +503,13 @@ const WardCandidateListPage = () => {
   const [votingWindow, setVotingWindow] = useState<{ startTime: number; endTime: number; description?: string; isActive?: boolean; electionName?: string; electionId?: number } | null>(null);
   const [eligibilityDialogOpen, setEligibilityDialogOpen] = useState(false);
 
+  const isVotingActiveForThisElection =
+    votingWindowActive &&
+    votingWindow?.isActive === true &&
+    votingWindow?.electionId != null &&
+    selectedElectionId !== '' &&
+    Number(votingWindow.electionId) === Number(selectedElectionId);
+
   useEffect(() => {
     const flag = sessionStorage.getItem('showAspirantPrompt');
     if (flag) {
@@ -1911,8 +1918,10 @@ const WardCandidateListPage = () => {
           </Box>
         )}
 
-        {/* If server reports user has voted, show a green notice */}
-        {(user?.hasVoted || hasVoted) && (
+        {/* If server reports user has voted AND the active voting window is for
+            this tab's election, show a green notice. Scoped by electionId so
+            voting on Lok Sabha doesn't surface the message under MLA, etc. */}
+        {(user?.hasVoted || hasVoted) && isVotingActiveForThisElection && (
           <Box sx={{ my: 2 }}>
             <Typography sx={{ color: 'success.main', fontWeight: 700, textAlign: { xs: 'center', md: 'left' } }}>
               {isKannada ? 'ನೀವು ಈಗಾಗಲೇ ಮತ ಚಲಾಯಿಸಿದ್ದೀರಿ' : 'You have already voted'}
@@ -2858,12 +2867,6 @@ const WardCandidateListPage = () => {
                       {(() => {
                         const isDemo = isDemoCandidate(candidate);
                         const isInteractionEligible = !!((user as any)?.isChat || (user as any)?.isMeeting || (user as any)?.isPhoneCall);
-                        const isVotingActiveForThisElection =
-                          votingWindowActive &&
-                          votingWindow?.isActive === true &&
-                          votingWindow?.electionId != null &&
-                          selectedElectionId !== '' &&
-                          Number(votingWindow.electionId) === Number(selectedElectionId);
                         const voteDisabled = !isVotingActiveForThisElection || !isInteractionEligible;
                         const finalDisabled = isDemo || voteDisabled || hasVoted || Boolean(user?.hasVoted);
                         return (
