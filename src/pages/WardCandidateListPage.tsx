@@ -500,7 +500,7 @@ const WardCandidateListPage = () => {
     if (selectedGpVillage) filters.gpVillage = selectedGpVillage;
     sessionStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
   }, [selectedElectionId, selectedConstituency, selectedMunicipality, selectedGpState, selectedGpDistrict, selectedGpTaluk, selectedGpGram, selectedGpVillage]);
-  const [votingWindow, setVotingWindow] = useState<{ startTime: number; endTime: number; description?: string; isActive?: boolean; electionName?: string } | null>(null);
+  const [votingWindow, setVotingWindow] = useState<{ startTime: number; endTime: number; description?: string; isActive?: boolean; electionName?: string; electionId?: number } | null>(null);
   const [eligibilityDialogOpen, setEligibilityDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -765,7 +765,7 @@ const WardCandidateListPage = () => {
         const isVotingAllowed = windowResp?.data?.isVotingAllowed;
         setVotingWindowActive(Boolean(isVotingAllowed));
         const w = windowResp?.data?.window;
-        if (w) setVotingWindow({ startTime: w.startTime, endTime: w.endTime, description: w.description, isActive: Boolean(w.isActive), electionName: (windowResp as any)?.data?.window?.election?.name ?? '' });
+        if (w) setVotingWindow({ startTime: w.startTime, endTime: w.endTime, description: w.description, isActive: Boolean(w.isActive), electionName: (windowResp as any)?.data?.window?.election?.name ?? '', electionId: (w as any)?.electionId ?? (w as any)?.election?.id });
         setBlockedElectionType(isVotingAllowed && w?.isActive ? (w as any)?.election?.type ?? null : null);
       } catch (e) {
         // ignore
@@ -1069,7 +1069,7 @@ const WardCandidateListPage = () => {
           const isVotingAllowed = windowResp?.data?.isVotingAllowed;
           setVotingWindowActive(Boolean(isVotingAllowed));
           const w = windowResp?.data?.window;
-          if (w) setVotingWindow({ startTime: w.startTime, endTime: w.endTime, description: w.description, isActive: Boolean(w.isActive), electionName: (windowResp as any)?.data?.window?.election?.name ?? '' });
+          if (w) setVotingWindow({ startTime: w.startTime, endTime: w.endTime, description: w.description, isActive: Boolean(w.isActive), electionName: (windowResp as any)?.data?.window?.election?.name ?? '', electionId: (w as any)?.electionId ?? (w as any)?.election?.id });
           setBlockedElectionType(isVotingAllowed && w?.isActive ? (w as any)?.election?.type ?? null : null);
         } catch (e) {
           // ignore voting window errors
@@ -2858,7 +2858,13 @@ const WardCandidateListPage = () => {
                       {(() => {
                         const isDemo = isDemoCandidate(candidate);
                         const isInteractionEligible = !!((user as any)?.isChat || (user as any)?.isMeeting || (user as any)?.isPhoneCall);
-                        const voteDisabled = !votingWindowActive || !isInteractionEligible;
+                        const isVotingActiveForThisElection =
+                          votingWindowActive &&
+                          votingWindow?.isActive === true &&
+                          votingWindow?.electionId != null &&
+                          selectedElectionId !== '' &&
+                          Number(votingWindow.electionId) === Number(selectedElectionId);
+                        const voteDisabled = !isVotingActiveForThisElection || !isInteractionEligible;
                         const finalDisabled = isDemo || voteDisabled || hasVoted || Boolean(user?.hasVoted);
                         return (
                           <Box sx={{ width: '100%' }}>
