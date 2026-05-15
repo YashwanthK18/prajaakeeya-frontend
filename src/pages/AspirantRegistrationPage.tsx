@@ -74,7 +74,7 @@ const AspirantRegistrationPage = () => {
     return election?.type ?? '';
   })).current;
 
-  const { register, reset, resetField, setValue, watch, trigger, setError: setFormError, clearErrors, formState: { errors } } = useForm<AspirantForm>({
+  const { register, reset, resetField, setValue, watch, getValues, trigger, setError: setFormError, clearErrors, formState: { errors } } = useForm<AspirantForm>({
     resolver: yupResolver(aspirantFormSchema) as unknown as Resolver<AspirantForm>,
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -272,7 +272,11 @@ const AspirantRegistrationPage = () => {
   };
 
   const handleSubmitRegistration = async (finalize = false) => {
-    const values = watchedValues;
+    // Use getValues() rather than watchedValues — setValue() commits to RHF state synchronously,
+    // but watched values lag by one render. Reading getValues() avoids a first-submit race where
+    // constituencyId/electionId (just written by CandidateInformationStep.handleNextClick) hadn't
+    // propagated to the watched snapshot.
+    const values = getValues();
 
     setLoading(true);
     setError('');
