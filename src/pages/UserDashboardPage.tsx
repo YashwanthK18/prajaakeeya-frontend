@@ -34,6 +34,8 @@ import sopImg from '../assets/images/sop.png';
 import meetImg from '../assets/images/meet.png';
 import leaderImg from '../assets/images/leader.png';
 import managerImg from '../assets/images/manager.png';
+import advisorImg from '../assets/images/advisor.png';
+import staffImg from '../assets/images/staff.png';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -152,7 +154,7 @@ const UserDashboardPage = () => {
     {
       title: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants',
       description: t('userDashboard.actions.myStateAssemblyAspirantsDesc') || 'Aspirants in your Assembly constituency',
-      icon: <img src={managerImg} alt="state assembly aspirants" width={30} height={30} />,
+      icon: <img src={advisorImg} alt="state assembly aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=state_assembly`,
       variant: 'outlined' as const,
       color: 'secondary' as const
@@ -164,7 +166,7 @@ const UserDashboardPage = () => {
     ...((user as any)?.municipalCorporationConstituency?.id != null ? [{
       title: t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Corporation Aspirants',
       description: t('userDashboard.actions.myMunicipalCorporationAspirantsDesc') || 'Aspirants in your corporation ward',
-      icon: <img src={employeesImg} alt="municipal corporation aspirants" width={30} height={30} />,
+      icon: <img src={staffImg} alt="municipal corporation aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=municipal_corporation`,
       variant: 'outlined' as const,
       color: 'secondary' as const
@@ -249,7 +251,7 @@ const UserDashboardPage = () => {
     },
     {
       title: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants',
-      icon: <img src={managerImg} alt="state assembly aspirants" width={30} height={30} />,
+      icon: <img src={advisorImg} alt="state assembly aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=state_assembly`,
       variant: 'outlined' as const,
       color: 'secondary' as const,
@@ -258,7 +260,7 @@ const UserDashboardPage = () => {
     // saved one — a person belongs to exactly one local body, never both.
     ...((user as any)?.municipalCorporationConstituency?.id != null ? [{
       title: t('userDashboard.actions.myMunicipalCorporationAspirants') || 'My Municipal Corporation Aspirants',
-      icon: <img src={employeesImg} alt="municipal corporation aspirants" width={30} height={30} />,
+      icon: <img src={staffImg} alt="municipal corporation aspirants" width={30} height={30} />,
       path: `/user/aspirantslist?type=municipal_corporation`,
       variant: 'outlined' as const,
       color: 'secondary' as const,
