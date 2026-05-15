@@ -523,7 +523,7 @@ const UserRegisterPage = () => {
                   const label = t("pages.register.continueAsGuest");
                   const match = label.match(/^(.*?)\s*\((.+)\)\s*$/);
                   const main = match ? match[1] : label;
-                  const sub = match ? match[2] : "";
+                  const sub = match ? `(${match[2]})` : "";
                   return (
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.1 }}>
                       <Box component="span">{main}</Box>
