@@ -75,10 +75,20 @@ const typeToKind = (type: string): Kind => {
   }
 };
 
+const electionNameToTypeSlug = (electionName: string): string | undefined => {
+  // Strip parenthetical (e.g., "Lok Sabha (MP)" → "Lok Sabha"), lowercase, snake_case.
+  const base = electionName.replace(/\(.*?\)/g, '').trim().toLowerCase();
+  if (!base) return undefined;
+  return base.replace(/\s+/g, '_');
+};
+
 const hrefFor = (n: ApiNotification): string | undefined => {
   switch (n.type) {
-    case 'voting_window':
-      return '/user/vote';
+    case 'voting_window': {
+      const electionName = (n.metadata?.electionName as string | undefined) ?? undefined;
+      const slug = electionName ? electionNameToTypeSlug(electionName) : undefined;
+      return slug ? `/user/aspirantslist?type=${slug}` : '/user/aspirantslist';
+    }
     case 'civic_issue':
       return '/user/civic-issues';
     case 'new_aspirant':
