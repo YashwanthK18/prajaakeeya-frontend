@@ -333,46 +333,13 @@ export default function NotificationsPage() {
               </IconButton>
             </Tooltip>
 
-            <Box
-              sx={{
-                width: 46,
-                height: 46,
-                borderRadius: 2,
-                bgcolor: 'rgba(245,168,0,0.12)',
-                color: accent,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(245,168,0,0.3)',
-                flexShrink: 0,
-              }}
-            >
-              <BellIcon />
-            </Box>
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography
-                  variant="h4"
-                  sx={{ fontFamily: FF, fontWeight: 800, color: textPrimary, lineHeight: 1.1 }}
-                >
-                  {t('notifications.title') || 'Notifications'}
-                </Typography>
-                {unreadCount > 0 && (
-                  <Chip
-                    size="small"
-                    label={`${unreadCount} ${t('notifications.new') || 'new'}`}
-                    sx={{
-                      height: 22,
-                      fontFamily: FF,
-                      fontWeight: 700,
-                      fontSize: '0.7rem',
-                      bgcolor: isDark ? 'rgba(245,168,0,0.18)' : 'rgba(245,168,0,0.16)',
-                      color: isDark ? '#ffe4aa' : BRAND.brown,
-                      border: `1px solid rgba(245,168,0,0.4)`,
-                    }}
-                  />
-                )}
-              </Box>
+              <Typography
+                variant="h4"
+                sx={{ fontFamily: FF, fontWeight: 800, color: textPrimary, lineHeight: 1.1 }}
+              >
+                {t('notifications.title') || 'Notifications'}
+              </Typography>
               <Typography variant="body2" sx={{ fontFamily: FF, color: subText, mt: 0.3 }}>
                 {t('notifications.subtitle') || 'Stay updated on your ward, issues, and aspirants.'}
               </Typography>
