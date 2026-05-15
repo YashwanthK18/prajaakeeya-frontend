@@ -1715,6 +1715,35 @@
       "villageLabel": "गांव"
     }
   },
+  "notifications": {
+    "title": "सूचना",
+    "subtitle": "अपन वार्ड, इच्छुक उम्मीदवार, चैट, बैठक आ मतदान खिड़की के बारे में अपडेट रहीं।",
+    "new": "नया",
+    "markAllRead": "सब पढ़ल मानीं",
+    "clearAll": "सब साफ करीं",
+    "delete": "मेटाईं",
+    "emptyTitle": "रउआ सब देख लेले बानी",
+    "emptyUnreadTitle": "कौनो अनपढ़ल सूचना नइखे",
+    "emptyBody": "नया गतिविधि इहाँ देखाई दीही।",
+    "endOfList": "रउआ सब देख लेले बानी",
+    "tabs": {
+      "all": "सभ",
+      "unread": "अनपढ़ल"
+    },
+    "sections": {
+      "today": "आज",
+      "yesterday": "काल्ह",
+      "earlier": "पहिले"
+    },
+    "kinds": {
+      "vote": "मतदान",
+      "issue": "सार्वजनिक समस्या",
+      "aspirant": "इच्छुक उम्मीदवार",
+      "announcement": "घोषणा",
+      "chat": "चैट",
+      "meeting": "बैठक"
+    }
+  },
   "civicIssues": {
     "title": "सार्वजनिक समस्या",
     "subtitle": "अपन वार्ड के समस्या के रिपोर्ट अभी करीं",
