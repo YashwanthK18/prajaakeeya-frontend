@@ -465,25 +465,21 @@ const UserDashboardPage = () => {
       }
 
       // Relative API path — use apiClient with baseURL
+      let blob: Blob | null = null;
       try {
-        let blob: Blob | null = null;
-        try {
-          const apiResp = await apiClient.get(src, { responseType: 'blob' });
-          blob = apiResp.data as Blob;
-        } catch (apiErr) {
-          const resp = await fetch(src, {
-            method: 'GET',
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          });
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          blob = await resp.blob();
-        }
-        if (!blob || blob.size === 0) throw new Error('Empty profile image');
-        const dataUrl = await blobToDataUrl(blob);
-        return { image: await loadImage(dataUrl), cleanup: () => { } };
-      } catch (e) {
-        throw e;
+        const apiResp = await apiClient.get(src, { responseType: 'blob' });
+        blob = apiResp.data as Blob;
+      } catch (apiErr) {
+        const resp = await fetch(src, {
+          method: 'GET',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        blob = await resp.blob();
       }
+      if (!blob || blob.size === 0) throw new Error('Empty profile image');
+      const dataUrl = await blobToDataUrl(blob);
+      return { image: await loadImage(dataUrl), cleanup: () => { } };
     };
 
     // ── Background ──

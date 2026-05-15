@@ -3274,7 +3274,7 @@ const WardCandidateListPage = () => {
                     setChatMessages((prev) => [...prev, m]);
                     setChatText('');
                     setSuccessOpen(true);
-                    try { void trackInteraction(activeAspirant.id); } catch (_) { }
+                    try { void trackInteraction(activeAspirant.id); } catch (_) { /* noop */ }
                   } catch (err: any) {
                     setErrorMsg(err?.response?.data?.message || 'Failed to send message');
                     setErrorOpen(true);
@@ -3296,7 +3296,7 @@ const WardCandidateListPage = () => {
                   setChatMessages((prev) => [...prev, m]);
                   setChatText('');
                   setSuccessOpen(true);
-                  try { void trackInteraction(activeAspirant.id); } catch (_) { }
+                  try { void trackInteraction(activeAspirant.id); } catch (_) { /* noop */ }
                 } catch (err: any) {
                   setErrorMsg(err?.response?.data?.message || 'Failed to send message');
                   setErrorOpen(true);

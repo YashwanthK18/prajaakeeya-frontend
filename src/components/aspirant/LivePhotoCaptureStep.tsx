@@ -105,7 +105,9 @@ const LivePhotoCaptureStep = ({
         try {
           const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
           if (videoRef.current) videoRef.current.srcObject = s;
-        } catch { }
+        } catch {
+          // Ignore restore failure
+        }
       }
     }
   };

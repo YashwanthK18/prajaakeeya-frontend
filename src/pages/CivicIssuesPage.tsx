@@ -577,7 +577,7 @@ const CivicIssuesPage: React.FC = () => {
             user can switch tabs even after deep-linking from the aspirants
             list. The arriving filterElectionId is mapped to the right tab
             automatically by the effect above. */}
-      {true ? (
+      {(
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.38, delay: 0.1 }}>
           <Box sx={{
             p: { xs: 1.5, sm: 2 },
@@ -753,7 +753,7 @@ const CivicIssuesPage: React.FC = () => {
             })()}
           </Box>
         </motion.div>
-      ) : null}
+      )}
 
       {/* ── Issues List ────────────────────────────────────────────────────── */}
       {!loading && !fetchError && issues.length > 0 && (

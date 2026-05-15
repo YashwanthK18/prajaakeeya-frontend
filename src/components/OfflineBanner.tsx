@@ -31,7 +31,7 @@ const OfflineBanner = () => {
           '& .MuiAlert-message': { textAlign: 'center' },
         }}
       >
-        You're offline. Some features may not be available.
+        You&apos;re offline. Some features may not be available.
       </Alert>
     </Collapse>
   );

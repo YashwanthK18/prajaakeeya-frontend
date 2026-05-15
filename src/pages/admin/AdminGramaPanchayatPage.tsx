@@ -420,7 +420,7 @@ const AdminGramaPanchayatPage: React.FC = () => {
         <DialogTitle>Delete Entry</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{deleteConfirm.item?.villageName}" (Sr.No {deleteConfirm.item?.srNo})?
+            Are you sure you want to delete &quot;{deleteConfirm.item?.villageName}&quot; (Sr.No {deleteConfirm.item?.srNo})?
           </Typography>
         </DialogContent>
         <DialogActions>

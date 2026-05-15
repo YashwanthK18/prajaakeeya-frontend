@@ -12,7 +12,7 @@ export type NotificationType =
   | 'meeting'
   | 'visit'
   | 'announcement'
-  | (string & {}); // allow future server-side types without breaking the build
+  | (string & NonNullable<unknown>); // allow future server-side types without breaking the build
 
 export interface ApiNotification {
   id: number;

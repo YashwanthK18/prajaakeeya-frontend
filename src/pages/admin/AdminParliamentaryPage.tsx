@@ -214,7 +214,7 @@ const AdminParliamentaryPage: React.FC = () => {
       <Dialog open={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false })}>
         <DialogTitle>Delete Parliamentary constituency</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete "{deleteConfirm.item?.name}"?</Typography>
+          <Typography>Are you sure you want to delete &quot;{deleteConfirm.item?.name}&quot;?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirm({ open: false })}>Cancel</Button>
