@@ -247,20 +247,6 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleClear = async () => {
-    if (items.length === 0) return;
-    const snapshot = items;
-    setItems([]);
-    try {
-      await Promise.all(snapshot.map((n) => deleteNotification(n.id)));
-      emitNotificationsChanged();
-    } catch (e: any) {
-      setError(e?.response?.data?.message || 'Failed to clear notifications.');
-      // Refetch to recover whatever survived
-      fetchData();
-    }
-  };
-
   const handleClickItem = (n: UiNotification) => {
     if (!n.read) {
       setItems((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
@@ -361,81 +347,67 @@ export default function NotificationsPage() {
             </Box>
           </Box>
 
-          {/* Right side actions */}
-          <Stack direction="row" spacing={1} sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
-            <Button
-              size="small"
-              variant="outlined"
-              disabled={unreadCount === 0 || loading}
-              startIcon={<DoneAllIcon sx={{ fontSize: 18 }} />}
-              onClick={handleMarkAll}
-              sx={{
-                fontFamily: FF,
-                fontWeight: 700,
-                textTransform: 'none',
-                borderRadius: 50,
-                borderColor: borderFaint,
-                color: accent,
-                '&:hover': {
-                  borderColor: accent,
-                  bgcolor: isDark ? 'rgba(245,168,0,0.08)' : 'rgba(245,168,0,0.10)',
-                },
-                '&.Mui-disabled': { color: subText, borderColor: borderFaint },
-              }}
-            >
-              {t('notifications.markAllRead') || 'Mark all read'}
-            </Button>
-            <Tooltip title={t('notifications.clearAll') || 'Clear all'}>
-              <span>
-                <IconButton
-                  size="small"
-                  disabled={items.length === 0 || loading}
-                  onClick={handleClear}
-                  sx={{
-                    color: subText,
-                    border: `1px solid ${borderFaint}`,
-                    borderRadius: 50,
-                    '&:hover': { color: BRAND.red, borderColor: BRAND.red },
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Stack>
         </Box>
       </motion.div>
 
-      {/* Filter tabs */}
-      <ToggleButtonGroup
-        value={filter}
-        exclusive
-        size="small"
-        onChange={(_, v) => v && setFilter(v)}
-        sx={{
-          alignSelf: 'flex-start',
-          '& .MuiToggleButton-root': {
+      {/* Filter tabs + Mark all read */}
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', rowGap: 1 }}
+      >
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          size="small"
+          onChange={(_, v) => v && setFilter(v)}
+          sx={{
+            '& .MuiToggleButton-root': {
+              fontFamily: FF,
+              fontWeight: 700,
+              textTransform: 'none',
+              border: `1px solid ${borderFaint}`,
+              color: subText,
+              px: 2,
+              '&.Mui-selected': {
+                bgcolor: isDark ? 'rgba(245,168,0,0.16)' : 'rgba(245,168,0,0.14)',
+                color: accent,
+                borderColor: accent,
+              },
+            },
+          }}
+        >
+          <ToggleButton value="all">
+            {t('notifications.tabs.all') || 'All'} ({items.length})
+          </ToggleButton>
+          <ToggleButton value="unread">
+            {t('notifications.tabs.unread') || 'Unread'} ({unreadCount})
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        <Button
+          size="small"
+          variant="outlined"
+          disabled={unreadCount === 0 || loading}
+          startIcon={<DoneAllIcon sx={{ fontSize: 18 }} />}
+          onClick={handleMarkAll}
+          sx={{
             fontFamily: FF,
             fontWeight: 700,
             textTransform: 'none',
-            border: `1px solid ${borderFaint}`,
-            color: subText,
-            px: 2,
-            '&.Mui-selected': {
-              bgcolor: isDark ? 'rgba(245,168,0,0.16)' : 'rgba(245,168,0,0.14)',
-              color: accent,
+            borderRadius: 50,
+            borderColor: borderFaint,
+            color: accent,
+            '&:hover': {
               borderColor: accent,
+              bgcolor: isDark ? 'rgba(245,168,0,0.08)' : 'rgba(245,168,0,0.10)',
             },
-          },
-        }}
-      >
-        <ToggleButton value="all">
-          {t('notifications.tabs.all') || 'All'} ({items.length})
-        </ToggleButton>
-        <ToggleButton value="unread">
-          {t('notifications.tabs.unread') || 'Unread'} ({unreadCount})
-        </ToggleButton>
-      </ToggleButtonGroup>
+            '&.Mui-disabled': { color: subText, borderColor: borderFaint },
+          }}
+        >
+          {t('notifications.markAllRead') || 'Mark all read'}
+        </Button>
+      </Stack>
 
       {/* Error */}
       {error && (
