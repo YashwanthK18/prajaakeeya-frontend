@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, CircularProgress, Table, TableHead, TableBody, TableRow, TableCell,
-    TextField, Avatar, Card, CardContent, Stack, useTheme, useMediaQuery, Chip
+    TextField, Avatar, Card, CardContent, Stack, useTheme, useMediaQuery, Chip, Pagination
 } from '@mui/material';
 import { Person as PersonIcon, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../services/apiClient';
+import { getAllAspirants } from '../services/aspirantService';
+
+const PAGE_SIZE = 50;
 
 const RegisteredAspirantsPage: React.FC = () => {
     const { i18n } = useTranslation();
@@ -15,14 +17,12 @@ const RegisteredAspirantsPage: React.FC = () => {
 
     const [aspirants, setAspirants] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const sentinelRef = useRef<HTMLDivElement | null>(null);
 
     const navigate = useNavigate();
     const theme = useTheme();
@@ -35,70 +35,29 @@ const RegisteredAspirantsPage: React.FC = () => {
     const textPrimary = theme.palette.text.primary;
     const textSecondary = theme.palette.text.secondary;
 
-    const fetchAspirants = useCallback(async (searchQuery: string, pageNum: number, append: boolean) => {
-        if (append) setLoadingMore(true);
-        else setLoading(true);
-        setError(null);
-        try {
-            const params: Record<string, any> = searchQuery.trim()
-                ? { search: searchQuery.trim() }
-                : { page: pageNum, limit: 20 };
-            const resp = await apiClient.get('/aspirants/all', { params });
-            const raw = Array.isArray(resp?.data?.data) ? resp.data.data : [];
-            const tp = searchQuery.trim() ? 1 : (resp?.data?.totalPages ?? 1);
-            setTotalPages(tp);
-            setTotal(resp?.data?.total ?? raw.length);
-            if (append) {
-                setAspirants((prev) => [...prev, ...raw]);
-            } else {
-                setAspirants(raw);
-            }
-            setHasMore(pageNum < tp);
-        } catch (err: any) {
-            console.error('Failed to fetch aspirants', err);
-            setError(err?.response?.data?.message || err?.message || 'Failed to load aspirants');
-        } finally {
-            setLoading(false);
-            setLoadingMore(false);
-        }
-    }, []);
-
-    // Initial fetch
-    useEffect(() => {
-        fetchAspirants('', 1, false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Debounced search — reset to page 1 when query changes
+    // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
+            setDebouncedQuery(query.trim());
             setPage(1);
-            setHasMore(true);
-            fetchAspirants(query, 1, false);
         }, 400);
         return () => clearTimeout(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query]);
 
-    // Infinite scroll — IntersectionObserver on sentinel
+    // Fetch aspirants — server-side pagination and search
     useEffect(() => {
-        const el = sentinelRef.current;
-        if (!el) return;
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
-                    setPage((prev) => {
-                        const next = prev + 1;
-                        fetchAspirants(query, next, true);
-                        return next;
-                    });
-                }
-            },
-            { threshold: 0.1 }
-        );
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [hasMore, loading, loadingMore, query, fetchAspirants]);
+        setLoading(true);
+        setError(null);
+        getAllAspirants(page, PAGE_SIZE, debouncedQuery || undefined)
+            .then((resp: any) => {
+                const raw = Array.isArray(resp?.data?.data) ? resp.data.data : [];
+                setTotalPages(resp?.data?.totalPages ?? 1);
+                setTotal(resp?.data?.total ?? raw.length);
+                setAspirants(raw);
+            })
+            .catch((err: any) => setError(err?.response?.data?.message || err?.message || 'Failed to load aspirants'))
+            .finally(() => setLoading(false));
+    }, [page, debouncedQuery]);
 
     return (
         <Box sx={{ p: { xs: 1.25, sm: 2.5 } }}>
@@ -135,6 +94,10 @@ const RegisteredAspirantsPage: React.FC = () => {
                 </Box>
             ) : error ? (
                 <Typography color="error">{error}</Typography>
+            ) : aspirants.length === 0 ? (
+                <Typography sx={{ textAlign: 'center', py: 6, color: textSecondary, fontFamily: FF }}>
+                    {isKannada ? 'ಆಕಾಂಕ್ಷಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ' : 'No aspirants found'}
+                </Typography>
             ) : (
                 <>
                     {isMobile ? (
@@ -200,7 +163,7 @@ const RegisteredAspirantsPage: React.FC = () => {
                                             sx={{ cursor: 'pointer', '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(37,58,154,0.12)' : 'rgba(37,58,154,0.04)' } }}
                                         >
                                             <TableCell sx={{ color: textSecondary, fontFamily: FF, fontSize: '0.82rem' }}>
-                                                {idx + 1}
+                                                {(page - 1) * PAGE_SIZE + idx + 1}
                                             </TableCell>
                                             <TableCell>
                                                 <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -225,17 +188,17 @@ const RegisteredAspirantsPage: React.FC = () => {
                         </Card>
                     )}
 
-                    {/* Infinite scroll sentinel */}
-                    <Box ref={sentinelRef} sx={{ height: 1 }} />
-                    {loadingMore && (
-                        <Box sx={{ textAlign: 'center', py: 2 }}>
-                            <CircularProgress size={28} />
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={(_, value) => { setPage(value); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                color="primary"
+                                shape="rounded"
+                            />
                         </Box>
-                    )}
-                    {!hasMore && aspirants.length > 0 && (
-                        <Typography variant="body2" sx={{ textAlign: 'center', py: 2, color: textSecondary, fontFamily: FF }}>
-                            {isKannada ? 'ಇನ್ನಷ್ಟು ಆಕಾಂಕ್ಷಿಗಳು ಇಲ್ಲ' : 'No more aspirants to load'}
-                        </Typography>
                     )}
                 </>
             )}
