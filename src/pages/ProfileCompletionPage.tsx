@@ -1204,13 +1204,9 @@ const ProfileCompletionPage = ({ hideLogout }: { hideLogout?: boolean } = {}) =>
                                     >
                                         <MenuItem value="municipality">
                                             {t('pages.constituencyOnboarding.localBodyMunicipality') || 'Municipality'}
-                                            {' — '}
-                                            {t('pages.constituencyOnboarding.localBodyMunicipalityDesc') || 'I live in a city or town'}
                                         </MenuItem>
                                         <MenuItem value="gram_panchayat">
                                             {t('pages.constituencyOnboarding.localBodyGramPanchayat') || 'Gram Panchayat'}
-                                            {' — '}
-                                            {t('pages.constituencyOnboarding.localBodyGramPanchayatDesc') || 'I live in a village'}
                                         </MenuItem>
                                     </TextField>
                                 </Grid>
