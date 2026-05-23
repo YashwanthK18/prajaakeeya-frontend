@@ -30,6 +30,7 @@ export interface IssueCategory {
 export interface IssuesResponse {
   issues: CivicIssue[];
   categories: IssueCategory[];
+  totalHandRaises?: number;
 }
 
 const toWardParam = (wardNumber: string | number): string => {
@@ -125,5 +126,6 @@ export const getIssuesByElectionAndConstituency = async (
   return {
     issues: issues.filter(i => i.isActive !== false).sort((a, b) => b.createdAt - a.createdAt),
     categories,
+    totalHandRaises: typeof (data as any).totalHandRaises === 'number' ? (data as any).totalHandRaises : undefined,
   };
 };
