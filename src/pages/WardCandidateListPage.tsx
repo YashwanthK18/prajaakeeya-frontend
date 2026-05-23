@@ -2887,7 +2887,10 @@ const WardCandidateListPage = () => {
                                 }}
                                 onClick={() => {
                                   void trackInteraction(candidate.id, '/users/track/phone-call');
-                                  const num = candidate.whatsappNumber!.replace(/[^0-9]/g, '');
+                                  const digits = candidate.whatsappNumber!.replace(/[^0-9]/g, '');
+                                  // wa.me requires full international format. PWA path (window.location.href)
+                                  // strictly rejects numbers without a country code; browser path is forgiving.
+                                  const num = digits.length === 10 ? `91${digits}` : digits;
                                   const url = `https://wa.me/${num}`;
                                   // iOS standalone PWAs silently no-op window.open('_blank'),
                                   // breaking the wa.me universal-link handoff to WhatsApp.

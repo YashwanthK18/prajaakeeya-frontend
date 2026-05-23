@@ -33,6 +33,16 @@ import { BRAND } from '../theme';
 import SopAgreementCard from '../components/aspirant/SopAgreementCard';
 
 const FF = "'Baloo 2', sans-serif";
+// blocking handoff to native apps (Instagram, Facebook, etc.). Navigate the current
+// window instead — iOS then hands the URL off to the right app.
+const openExternal = (url: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    const isStandalone =
+        window.matchMedia?.('(display-mode: standalone)').matches ||
+        (navigator as any).standalone === true;
+    if (isStandalone) window.location.href = url;
+    else window.open(url, '_blank', 'noopener,noreferrer');
+};
 
 const StarRating: React.FC<{ value: number; total?: number }> = ({ value, total = 5 }) => {
     const stars = [];
@@ -370,6 +380,7 @@ const AspirantViewDetailsPage: React.FC = () => {
                                         href={aspirant.instagramLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={(e) => openExternal(aspirant.instagramLink!, e)}
                                         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.7, textDecoration: 'none', px: 1.2, py: 0.7, borderRadius: '10px', border: '1px solid rgba(225,48,108,0.6)', background: 'rgba(225,48,108,0.08)', '&:hover': { background: 'rgba(225,48,108,0.16)' } }}
                                     >
                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -397,6 +408,7 @@ const AspirantViewDetailsPage: React.FC = () => {
                                         href={aspirant.facebookLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={(e) => openExternal(aspirant.facebookLink!, e)}
                                         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.7, textDecoration: 'none', px: 1.2, py: 0.7, borderRadius: '10px', border: '1px solid rgba(24,119,242,0.6)', background: 'rgba(24,119,242,0.08)', '&:hover': { background: 'rgba(24,119,242,0.16)' } }}
                                     >
                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -414,6 +426,7 @@ const AspirantViewDetailsPage: React.FC = () => {
                                         href={aspirant.linkedinLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={(e) => openExternal(aspirant.linkedinLink!, e)}
                                         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.7, textDecoration: 'none', px: 1.2, py: 0.7, borderRadius: '10px', border: '1px solid rgba(10,102,194,0.6)', background: 'rgba(10,102,194,0.08)', '&:hover': { background: 'rgba(10,102,194,0.16)' } }}
                                     >
                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -431,6 +444,7 @@ const AspirantViewDetailsPage: React.FC = () => {
                                         href={aspirant.twitterLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={(e) => openExternal(aspirant.twitterLink!, e)}
                                         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.7, textDecoration: 'none', px: 1.2, py: 0.7, borderRadius: '10px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', '&:hover': { background: isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.1)' } }}
                                     >
                                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
