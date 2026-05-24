@@ -473,8 +473,15 @@ const CandidateDetailsPage: React.FC = () => {
             console.error('Failed to track meeting:', err);
             // Continue to open meeting link even if tracking fails
         }
-        // Open meeting link in new tab
-        window.open(meetingLink, '_blank');
+        // Open meeting link — fall back to same-window nav in iOS standalone /
+        // wrapped WebView, where window.open('_blank') silently no-ops and
+        // gives a blank page (Instagram links were the common symptom).
+        const isStandalone =
+            window.matchMedia?.('(display-mode: standalone)').matches ||
+            (navigator as any).standalone === true ||
+            !!(window as any).ReactNativeWebView;
+        if (isStandalone) window.location.href = meetingLink;
+        else window.open(meetingLink, '_blank');
     };
 
     const handleDirectMeet = async () => {
@@ -543,7 +550,14 @@ const CandidateDetailsPage: React.FC = () => {
         const now = Date.now();
         const next = meetings.find((m: any) => Number(m.scheduledAt) > now) || meetings[0];
         const link = next?.meetingLink;
-        if (link) window.open(normalizeUrl(link), '_blank');
+        if (!link) return;
+        const url = normalizeUrl(link);
+        const isStandalone =
+            window.matchMedia?.('(display-mode: standalone)').matches ||
+            (navigator as any).standalone === true ||
+            !!(window as any).ReactNativeWebView;
+        if (isStandalone) window.location.href = url;
+        else window.open(url, '_blank');
     };
 
 

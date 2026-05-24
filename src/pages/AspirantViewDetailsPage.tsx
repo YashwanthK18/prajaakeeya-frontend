@@ -519,8 +519,8 @@ const AspirantViewDetailsPage: React.FC = () => {
                                             <Box sx={{ flex: 1 }}>
                                                 {m.title && <Typography sx={{ fontFamily: FF, fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>{m.title}</Typography>}
                                                 {start && (
-                                                    <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mb: 0.4 }}>
-                                                        <EventIcon sx={{ fontSize: '0.85rem', color: 'text.secondary' }} />
+                                                    <Stack direction="row" spacing={0.6} alignItems="flex-start" sx={{ mb: 0.4 }}>
+                                                        <EventIcon sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: '3px', flexShrink: 0 }} />
                                                         <Typography variant="caption" color="text.secondary" sx={{ fontFamily: FF }}>{start}{end ? ` — ${end}` : ''}</Typography>
                                                     </Stack>
                                                 )}
@@ -565,14 +565,14 @@ const AspirantViewDetailsPage: React.FC = () => {
                                     }}>
                                         {v.title && <Typography sx={{ fontFamily: FF, fontWeight: 700, fontSize: '0.95rem', mb: 0.5 }}>{v.title}</Typography>}
                                         {v.location && (
-                                            <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mb: 0.4 }}>
-                                                <PlaceIcon sx={{ fontSize: '0.85rem', color: isDark ? BRAND.yellow : BRAND.saffron }} />
+                                            <Stack direction="row" spacing={0.6} alignItems="flex-start" sx={{ mb: 0.4 }}>
+                                                <PlaceIcon sx={{ fontSize: '0.85rem', color: isDark ? BRAND.yellow : BRAND.saffron, mt: '3px', flexShrink: 0 }} />
                                                 <Typography variant="body2" sx={{ fontFamily: FF, fontWeight: 600 }}>{v.location}</Typography>
                                             </Stack>
                                         )}
                                         {start && (
-                                            <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mb: 0.4 }}>
-                                                <EventIcon sx={{ fontSize: '0.85rem', color: 'text.secondary' }} />
+                                            <Stack direction="row" spacing={0.6} alignItems="flex-start" sx={{ mb: 0.4 }}>
+                                                <EventIcon sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: '3px', flexShrink: 0 }} />
                                                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: FF }}>{start}</Typography>
                                             </Stack>
                                         )}

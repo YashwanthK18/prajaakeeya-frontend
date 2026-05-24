@@ -2435,7 +2435,22 @@ const WardCandidateListPage = () => {
                                     startIcon={<Box sx={{ display: 'flex', alignItems: 'center' }}>{getPlatformIcon(meeting.platform, 25, (!isDemoCandidate(candidate) && !!meetEndMs && now > meetEndMs) ? 'default' : (meeting.platform === 'instagram' || meeting.platform === 'facebook') ? 'white' : 'default')}</Box>}
                                     endIcon={<OpenInNewIcon sx={{ fontSize: 12 }} />}
                                     sx={{ mt: 1.2, height: 34, borderRadius: '8px', textTransform: 'none', fontWeight: 800, color: '#fff', fontSize: '0.74rem', ...getPlatformButtonStyle(meeting.platform), '&.Mui-disabled': { background: 'rgba(120,120,120,0.25)', color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.6)', '& .MuiSvgIcon-root': { color: isDark ? 'rgba(255,255,255,0.35)' : '#1976d2' } } }}
-                                    onClick={() => { void trackInteraction(candidate.id); const link = meeting.meetingLink && !/^https?:\/\//i.test(meeting.meetingLink) ? `https://${meeting.meetingLink}` : meeting.meetingLink; window.open(link, '_blank', 'noopener'); }}
+                                    onClick={() => {
+                                      void trackInteraction(candidate.id);
+                                      const raw = meeting.meetingLink;
+                                      const link = raw && !/^https?:\/\//i.test(raw) ? `https://${raw}` : raw;
+                                      if (!link) return;
+                                      // iOS standalone PWA / wrapped WebView silently no-ops window.open('_blank'),
+                                      // which is why Instagram (and other) meeting links rendered blank on iOS while
+                                      // working on Android. Same-window navigation lets iOS hand the universal link
+                                      // to the native IG / FB / Zoom / Meet app.
+                                      const isStandalone =
+                                        window.matchMedia?.('(display-mode: standalone)').matches ||
+                                        (navigator as any).standalone === true ||
+                                        !!(window as any).ReactNativeWebView;
+                                      if (isStandalone) window.location.href = link;
+                                      else window.open(link, '_blank', 'noopener');
+                                    }}
                                   >
                                     {!isDemoCandidate(candidate) && !!meetEndMs && now > meetEndMs ? 'Meeting Ended' : (meeting.platform && PLATFORM_TEXT_KEYS[meeting.platform] ? t(PLATFORM_TEXT_KEYS[meeting.platform]) : t('pages.wardCandidates.joinVideoMeeting'))}
                                   </Button>

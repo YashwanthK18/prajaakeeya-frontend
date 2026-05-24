@@ -1762,6 +1762,7 @@
   "civicIssues": {
     "title": "Public Issues",
     "subtitle": "Report Your Ward Issues Now",
+    "totalReported": "Total Reported",
     "noElectionsAvailable": "No election types available. Update your profile first.",
     "tabMp": "MP Constituency",
     "tabMla": "MLA Constituency",

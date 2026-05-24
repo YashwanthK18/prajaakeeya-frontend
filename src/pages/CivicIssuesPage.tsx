@@ -76,6 +76,7 @@ const CivicIssuesPage: React.FC = () => {
 
   const [categories, setCategories] = useState<IssueCategory[]>([]);
   const [issues, setIssues] = useState<CivicIssue[]>([]);
+  const [totalHandRaises, setTotalHandRaises] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
 
@@ -209,6 +210,7 @@ const CivicIssuesPage: React.FC = () => {
         const data = await getIssuesByElectionAndConstituency(filterElectionId, filterConstituencyId, user?.id);
         setCategories(data.categories);
         setIssues(data.issues);
+        setTotalHandRaises(data.totalHandRaises ?? null);
         return;
       }
 
@@ -220,12 +222,14 @@ const CivicIssuesPage: React.FC = () => {
         const data = await getIssuesByElectionAndConstituency(Number(selectedElectionId), userConstId, user?.id);
         setCategories(data.categories);
         setIssues(data.issues);
+        setTotalHandRaises(data.totalHandRaises ?? null);
         return;
       }
 
       // Nothing picked yet.
       setCategories([]);
       setIssues([]);
+      setTotalHandRaises(null);
     } catch (err: any) {
       setFetchError(err?.response?.data?.message || err?.message || t('civicIssues.failedToLoad'));
     } finally {
@@ -486,6 +490,7 @@ const CivicIssuesPage: React.FC = () => {
           cat.name === category.name ? { ...cat, count: cat.count + 1, isRaised: true } : cat
         )
       );
+      setTotalHandRaises(prev => (prev == null ? 1 : prev + 1));
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || t('civicIssues.failedToReport');
       setSnack({ open: true, msg, severity: 'error' });
@@ -733,20 +738,36 @@ const CivicIssuesPage: React.FC = () => {
                       p: { xs: 1.25, sm: 1.5 },
                       borderRadius: 2,
                       border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(17,24,39,0.10)'}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1.2,
                     }}
                   >
-                    <Typography sx={{ fontFamily: FF, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.10em', color: BRAND.yellow, textTransform: 'uppercase', mb: 0.3 }}>
-                      {isMunicipal
-                        ? t('civicIssues.ward', { defaultValue: 'Ward' })
-                        : wantedType === 'gram_panchayat'
-                          ? t('civicIssues.village', { defaultValue: 'Village' })
-                          : t('civicIssues.constituency', { defaultValue: 'Constituency' })}
-                    </Typography>
-                    <Typography sx={{ fontFamily: FF, fontSize: '0.95rem', fontWeight: 700, color: textPrimary, wordBreak: 'break-word' }}>
-                      {selectedConstituency
-                        ? `${selectedConstituency.number ? `${selectedConstituency.number} - ` : ''}${selectedConstituency.name}`
-                        : `#${userConstId}`}
-                    </Typography>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography sx={{ fontFamily: FF, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.10em', color: BRAND.yellow, textTransform: 'uppercase', mb: 0.3 }}>
+                        {isMunicipal
+                          ? t('civicIssues.ward', { defaultValue: 'Ward' })
+                          : wantedType === 'gram_panchayat'
+                            ? t('civicIssues.village', { defaultValue: 'Village' })
+                            : t('civicIssues.constituency', { defaultValue: 'Constituency' })}
+                      </Typography>
+                      <Typography sx={{ fontFamily: FF, fontSize: '0.95rem', fontWeight: 700, color: textPrimary, wordBreak: 'break-word' }}>
+                        {selectedConstituency
+                          ? `${selectedConstituency.number ? `${selectedConstituency.number} - ` : ''}${selectedConstituency.name}`
+                          : `#${userConstId}`}
+                      </Typography>
+                    </Box>
+                    {totalHandRaises != null && (
+                      <Box sx={{ flexShrink: 0, textAlign: 'center' }}>
+                        <Typography sx={{ fontFamily: FF, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: textMid, lineHeight: 1.1 }}>
+                          {t('civicIssues.totalReported', { defaultValue: 'Total Reported' })}
+                        </Typography>
+                        <Typography sx={{ fontFamily: FF, fontSize: '1.15rem', fontWeight: 800, color: GOLD, lineHeight: 1.1, mt: 0.2 }}>
+                          {totalHandRaises}
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
                 </Stack>
               );

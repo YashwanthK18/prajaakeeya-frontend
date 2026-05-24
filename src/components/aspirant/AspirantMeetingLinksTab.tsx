@@ -136,17 +136,59 @@ const AspirantMeetingLinksTab: React.FC<AspirantMeetingLinksTabProps> = ({
             const host = u.hostname.replace(/^www\./, '');
             const path = u.pathname;
 
-            const allowedDomains: Record<string, (p: string) => boolean> = {
-                'meet.google.com': (p) => /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/.test(p),
-                'zoom.us': (p) => p.startsWith('/j/') || p.startsWith('/my/'),
-                'instagram.com': (p) => p.length > 1,
-                'facebook.com': (p) => p.length > 1,
-                'fb.com': (p) => p.length > 1,
-            };
+            const hostMatches = (base: string) => host === base || host.endsWith(`.${base}`);
+            const igUser = '[A-Za-z0-9_.][A-Za-z0-9_.]{0,29}';
+            const fbUser = '[A-Za-z0-9.][A-Za-z0-9.-]{2,}';
 
-            const domainValidator = allowedDomains[host];
-            if (!domainValidator) return t('userDashboard.aspirant.meetLinkDomain', { defaultValue: 'Enter a valid meeting link (Google Meet / Zoom / Instagram / Facebook)' });
-            if (!domainValidator(path)) return t('userDashboard.aspirant.meetLinkInvalid', { defaultValue: 'The meeting link format appears invalid. Please check and try again.' });
+            const allowedDomains: { base: string; check: (p: string) => boolean }[] = [
+                {
+                    base: 'meet.google.com',
+                    check: (p) =>
+                        /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}\/?$/.test(p) ||
+                        /^\/lookup\/[A-Za-z0-9_-]+\/?$/.test(p),
+                },
+                {
+                    base: 'zoom.us',
+                    check: (p) =>
+                        /^\/j\/\d{8,12}\/?$/.test(p) ||
+                        /^\/my\/[A-Za-z0-9._-]+\/?$/.test(p) ||
+                        /^\/webinar\/register\/[A-Za-z0-9_-]+\/?$/.test(p) ||
+                        /^\/meeting\/\d{8,12}\/?$/.test(p) ||
+                        /^\/s\/\d{8,12}\/?$/.test(p),
+                },
+                {
+                    base: 'instagram.com',
+                    check: (p) =>
+                        new RegExp(`^/${igUser}/?$`).test(p) ||
+                        new RegExp(`^/${igUser}/live/?$`).test(p) ||
+                        /^\/live\/[A-Za-z0-9_-]+\/?$/.test(p) ||
+                        /^\/reel\/[A-Za-z0-9_-]+\/?$/.test(p) ||
+                        /^\/p\/[A-Za-z0-9_-]+\/?$/.test(p) ||
+                        new RegExp(`^/stories/${igUser}(/[A-Za-z0-9_-]+)?/?$`).test(p),
+                },
+                {
+                    base: 'facebook.com',
+                    check: (p) =>
+                        /^\/profile\.php\/?$/.test(p) ||
+                        /^\/(groups|events|watch|live|messages|gaming)(\/.*)?$/.test(p) ||
+                        new RegExp(`^/${fbUser}/?$`).test(p) ||
+                        new RegExp(`^/${fbUser}/(live|videos|posts|photos)(\\/.*)?$`).test(p),
+                },
+                {
+                    // m.me is Messenger's short link host — common for shared
+                    // chat / video-call invites from Facebook accounts.
+                    base: 'm.me',
+                    check: (p) => /^\/[A-Za-z0-9.][A-Za-z0-9.-]{0,49}\/?$/.test(p),
+                },
+                {
+                    base: 'fb.com',
+                    check: (p) => new RegExp(`^/${fbUser}/?$`).test(p),
+                },
+            ];
+
+            const matched = allowedDomains.find((d) => hostMatches(d.base));
+            if (!matched) return t('userDashboard.aspirant.meetLinkDomain', { defaultValue: 'Enter a valid meeting link (Google Meet / Zoom / Instagram / Facebook)' });
+            if (!matched.check(path)) return t('userDashboard.aspirant.meetLinkInvalid', { defaultValue: 'The meeting link format appears invalid. Please check and try again.' });
             return null;
         } catch (e) {
             return t('userDashboard.aspirant.meetLinkInvalid', { defaultValue: 'Please enter a valid URL for the meeting link.' });
@@ -483,7 +525,20 @@ const AspirantMeetingLinksTab: React.FC<AspirantMeetingLinksTabProps> = ({
                                                     borderLeftColor: isCompleted ? undefined : t.palette.primary.main,
                                                     '&:hover': isCompleted ? { transform: 'none' } : { transform: 'translateY(-4px)', boxShadow: isDark ? '0 18px 40px rgba(0,0,0,0.5)' : '0 18px 40px rgba(255,106,0,0.08)' }
                                                 })}
-                                                onClick={() => meeting.meetingLink && window.open(normalizeMeetingUrl(meeting.meetingLink), '_blank')}
+                                                onClick={() => {
+                                                    if (!meeting.meetingLink) return;
+                                                    const link = normalizeMeetingUrl(meeting.meetingLink);
+                                                    // See note in WardCandidateListPage — iOS WebView / standalone
+                                                    // PWA silently no-ops window.open('_blank'), causing blank
+                                                    // Instagram links. Use same-window nav so iOS routes the
+                                                    // universal link to the native app.
+                                                    const isStandalone =
+                                                        window.matchMedia?.('(display-mode: standalone)').matches ||
+                                                        (navigator as any).standalone === true ||
+                                                        !!(window as any).ReactNativeWebView;
+                                                    if (isStandalone) window.location.href = link;
+                                                    else window.open(link, '_blank', 'noopener');
+                                                }}
                                             >
                                                 {/* Mobile: delete icon at top-right */}
                                                 {isMobile && (
