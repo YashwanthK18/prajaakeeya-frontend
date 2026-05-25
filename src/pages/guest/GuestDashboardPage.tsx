@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, Box, Stack, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
-import king1Img from '../../assets/images/king1.png';
+import React from 'react';
 import leaderImg from '../../assets/images/leader.png';
 import alertImg from '../../assets/images/alert.png';
 import sopImg from '../../assets/images/sop.png';
@@ -8,6 +8,7 @@ import employeesImg from '../../assets/images/employees.png';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BRAND } from '../../theme';
+import { getVoters } from '../../services/voterService';
 
 const FF = "'Baloo 2', sans-serif";
 
@@ -20,6 +21,21 @@ const GuestDashboardPage = () => {
 
   const textPrimary = theme.palette.text.primary;
   const GOLD = isDark ? BRAND.yellow : BRAND.yellowLight;
+  const textHigh = isDark ? 'rgba(255,255,255,0.66)' : 'rgba(17,24,39,0.72)';
+  const BORDER = isDark ? 'rgba(245,168,0,0.20)' : 'rgba(245,168,0,0.35)';
+
+  const [totalVoters, setTotalVoters] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    getVoters(1, 1)
+      .then((resp) => {
+        if (cancelled) return;
+        const total = (resp?.data as any)?.totalUsers ?? (resp?.data as any)?.total ?? null;
+        if (typeof total === 'number') setTotalVoters(total);
+      })
+      .catch(() => { /* ignore — count stays hidden */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const heroBg = isDark
     ? 'radial-gradient(130% 150% at 6% 0%, rgba(200,24,10,0.2) 0%, rgba(10,8,8,1) 55%), radial-gradient(120% 130% at 100% 0%, rgba(37,58,154,0.16) 0%, rgba(10,8,8,1) 55%)'
@@ -29,11 +45,12 @@ const GuestDashboardPage = () => {
     : 'linear-gradient(rgba(17,24,39,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(17,24,39,.02) 1px,transparent 1px)';
 
   const actions = [
-    {
-      title: t('userDashboard.actions.voters', { defaultValue: 'Registered Voters' }),
-      icon: <img src={king1Img} alt="registered voters" width={30} height={30} />,
-      path: '/guest/voters',
-    },
+    // Registered Citizens tile — temporarily disabled; count shown in hero strip instead
+    // {
+    //   title: t('userDashboard.actions.voters', { defaultValue: 'Registered Voters' }),
+    //   icon: <img src={king1Img} alt="registered voters" width={30} height={30} />,
+    //   path: '/guest/voters',
+    // },
     {
       title: t('userDashboard.actions.candidates', { defaultValue: 'View Aspirants' }),
       icon: <img src={leaderImg} alt="view aspirants" width={30} height={30} />,
@@ -83,10 +100,32 @@ const GuestDashboardPage = () => {
               <Typography sx={{ fontFamily: FF, fontWeight: 800, fontSize: { xs: '1.55rem', md: '2rem' }, lineHeight: 1.08, color: textPrimary }}>
                 {isKannada ? 'ಅತಿಥಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್' : 'Guest Dashboard'}
               </Typography>
-              <Typography sx={{ fontFamily: FF, mt: 1, fontSize: '0.95rem', color: isDark ? 'rgba(255,255,255,0.66)' : 'rgba(17,24,39,0.72)' }}>
+              <Typography sx={{ fontFamily: FF, mt: 1, fontSize: '0.95rem', color: textHigh }}>
                 {isKannada ? 'ಪ್ರಜಾಕೀಯ ಅನ್ವೇಷಿಸಿ — ಭಾಗವಹಿಸಲು ನೋಂದಾಯಿಸಿ' : 'Explore Prajaakeeya — Register to participate'}
               </Typography>
             </Box>
+            {totalVoters != null && (
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1.2,
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 2,
+                  background: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.7)',
+                  border: `1px solid ${BORDER}`,
+                  alignSelf: 'flex-start',
+                }}
+              >
+                <Typography sx={{ fontFamily: FF, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: textHigh, lineHeight: 1 }}>
+                  {t('userDashboard.totalVoters', { defaultValue: 'No. of Registered Citizens' })}
+                </Typography>
+                <Typography sx={{ fontFamily: FF, fontSize: { xs: '1.2rem', md: '1.4rem' }, fontWeight: 800, color: textPrimary, lineHeight: 1 }}>
+                  {totalVoters.toLocaleString()}
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Box>
       </motion.div>
