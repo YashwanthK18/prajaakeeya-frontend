@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -200,40 +200,52 @@ const CivicIssuesPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, elections, user]);
 
+  // Params of the issues request currently in flight, to dedupe identical calls.
+  const inFlightIssuesRef = useRef<string | null>(null);
+
   const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setFetchError('');
-
-      // Deep-link filter from WardCandidateListPage wins.
-      if (filterElectionId && filterConstituencyId) {
-        const data = await getIssuesByElectionAndConstituency(filterElectionId, filterConstituencyId, user?.id);
-        setCategories(data.categories);
-        setIssues(data.issues);
-        setTotalHandRaises(data.totalHandRaises ?? null);
-        return;
-      }
-
-      // Otherwise pair the picked election with the user's saved constituency
-      // for that type (lokSabhaConstituencyId / stateAssemblyConstituencyId /
-      // municipalCorporationConstituencyId / gramPanchayatConstituencyId).
+    // Resolve the election + constituency we'd fetch for. Deep-link filter from
+    // WardCandidateListPage wins; otherwise pair the picked election with the
+    // user's saved constituency for that type.
+    let eId: number | null = null;
+    let cId: number | null = null;
+    if (filterElectionId && filterConstituencyId) {
+      eId = Number(filterElectionId);
+      cId = Number(filterConstituencyId);
+    } else {
       const userConstId = userConstituencyIdForType(selectedElectionType);
       if (selectedElectionId && userConstId != null) {
-        const data = await getIssuesByElectionAndConstituency(Number(selectedElectionId), userConstId, user?.id);
-        setCategories(data.categories);
-        setIssues(data.issues);
-        setTotalHandRaises(data.totalHandRaises ?? null);
-        return;
+        eId = Number(selectedElectionId);
+        cId = userConstId;
       }
+    }
 
-      // Nothing picked yet.
+    // Nothing picked yet.
+    if (eId == null || cId == null) {
       setCategories([]);
       setIssues([]);
       setTotalHandRaises(null);
+      return;
+    }
+
+    // Collapse duplicate concurrent requests for the identical params (the same
+    // issues call fires more than once while selection state settles on mount).
+    // The in-flight request still applies its result — no result is dropped.
+    const key = `${eId}:${cId}:${user?.id ?? ''}`;
+    if (inFlightIssuesRef.current === key) return;
+    inFlightIssuesRef.current = key;
+    try {
+      setLoading(true);
+      setFetchError('');
+      const data = await getIssuesByElectionAndConstituency(eId, cId, user?.id);
+      setCategories(data.categories);
+      setIssues(data.issues);
+      setTotalHandRaises(data.totalHandRaises ?? null);
     } catch (err: any) {
       setFetchError(err?.response?.data?.message || err?.message || t('civicIssues.failedToLoad'));
     } finally {
       setLoading(false);
+      inFlightIssuesRef.current = null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterElectionId, filterConstituencyId, selectedElectionId, selectedElectionType, user, t]);

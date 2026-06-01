@@ -1086,9 +1086,24 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
   // Tracks the election type the auto-load effect has already handled, so it
   // re-fires when the user navigates between dashboard tiles (different ?type=).
   const lastAutoLoadedTypeRef = useRef<string | null>(null);
+  // Params of the load currently in flight. On mount, two effects (the auto-load
+  // effect and the selectedConstituency effect) request the SAME election+
+  // constituency back-to-back; this collapses those into a single network call.
+  // A later, intentional refresh (e.g. after voting) runs once this clears.
+  const inFlightLoadRef = useRef<string | null>(null);
+  // Same idea for the constituency stats fetch, which the same mount burst
+  // would otherwise request multiple times for the identical election+constituency.
+  // `inFlightStatsRef` dedupes concurrent identical fetches; `latestStatsKeyRef`
+  // tracks the most-recently-requested key so the result is applied to state
+  // even when an effect re-run skipped (deduped) its own fetch.
+  const inFlightStatsRef = useRef<string | null>(null);
+  const latestStatsKeyRef = useRef<string | null>(null);
 
   // Load aspirants – called only when both election AND constituency/GP village are set
   const loadAspirants = useCallback(async (electionId: number, constituencyId: number) => {
+      const loadKey = `${electionId}:${constituencyId}`;
+      if (inFlightLoadRef.current === loadKey) return; // identical fetch already running
+      inFlightLoadRef.current = loadKey;
       try {
         setLoading(true);
         // Clear stale cards so the list area shows the loader (not the previous
@@ -1158,6 +1173,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
         setCandidates([]);
       } finally {
         setLoading(false);
+        inFlightLoadRef.current = null;
       }
   }, []);
 
@@ -1272,13 +1288,19 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
       : (selectedConstituency ? selectedConstituency.id : null);
     if (!eId || !cId) {
       setConstituencyStats(null);
+      latestStatsKeyRef.current = null;
       return;
     }
-    let cancelled = false;
+    const statsKey = `${eId}:${cId}`;
+    latestStatsKeyRef.current = statsKey;
+    // Skip launching a duplicate request — the in-flight one will apply its
+    // result below (guarded by latestStatsKeyRef, not a per-run cancel flag).
+    if (inFlightStatsRef.current === statsKey) return;
+    inFlightStatsRef.current = statsKey;
     fetchConstituencyStats(eId, cId)
-      .then(({ data }) => { if (!cancelled) setConstituencyStats(data); })
-      .catch(() => { if (!cancelled) setConstituencyStats(null); });
-    return () => { cancelled = true; };
+      .then(({ data }) => { if (latestStatsKeyRef.current === statsKey) setConstituencyStats(data); })
+      .catch(() => { if (latestStatsKeyRef.current === statsKey) setConstituencyStats(null); })
+      .finally(() => { inFlightStatsRef.current = null; });
   }, [selectedElectionId, selectedConstituency, selectedGpVillage, isGramPanchayat]);
 
   // Fetch aspirants for Gram Panchayat only when GP village changes
@@ -2270,12 +2292,12 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                                 )}
 
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: candidate.education ? 0.25 : 0.1 }}>
-                                  <Typography variant="body2" sx={{ fontSize: '0.72rem', color: votesLabelColor, fontWeight: 600 }}>
+                                  {/* <Typography variant="body2" sx={{ fontSize: '0.72rem', color: votesLabelColor, fontWeight: 600 }}>
                                     Vote:
                                   </Typography>
                                   <Typography variant="body2" sx={{ fontSize: '0.9rem', fontWeight: 900, color: votesValueColor, fontFamily: '"Baloo 2", cursive' }}>
                                     {votePercentages[candidate.id] ?? 0}%
-                                  </Typography>
+                                  </Typography> */}
                                 </Box>
                                 {(() => {
                                   const or = candidateOverallRatings[candidate.id];
@@ -3081,6 +3103,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                               </Box>
                             )}
 
+                            {/* Polling / vote button — temporarily disabled:
                             <Box
                               sx={{ width: '100%' }}
                               onClick={finalDisabled ? () => {
@@ -3132,6 +3155,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                                 {t('pages.wardCandidates.vote') || 'Polling'}
                               </Button>
                             </Box>
+                            */}
                           </Box>
                         );
                       })()}
