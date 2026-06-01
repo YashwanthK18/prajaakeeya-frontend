@@ -21,9 +21,7 @@ import { useTheme } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-import bgContent from '../assets/images/bg-content.webp';
 import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
-import prajakeeyaImg from '../assets/images/prajakeeya4.webp';
 
 const fadeInUp = {
     initial: { opacity: 0, y: 24 },
@@ -47,9 +45,6 @@ const ContactPage: React.FC = () => {
                     right: '50%',
                     ml: '-50vw',
                     mr: '-50vw',
-                    backgroundImage: `url(${bgContent})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
                     pb: { xs: 6, md: 10 },
                     overflowX: 'hidden'
                 }}
@@ -105,7 +100,6 @@ const ContactPage: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '70%' }}>
                                 <Box
                                     component="img"
-                                    src={prajakeeyaImg}
                                     alt="Prajakeeya"
                                     sx={{
                                         height: '100%',
