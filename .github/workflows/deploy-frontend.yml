@@ -1,4 +1,4 @@
-# Auto-deploy the frontend to S3 + CloudFront on every push to main.
+# Auto-deploy the frontend to S3 + CloudFront on every push to  main.
 # Auth is keyless via GitHub OIDC (assumes an IAM role — no AWS keys stored).
 
 name: Deploy Frontend
