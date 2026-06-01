@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { TextField, Button, Stack, Alert, Box, CircularProgress, Divider, Typography, useTheme, InputAdornment } from '@mui/material';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import SplitAuthLayout from '../components/SplitAuthLayout';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';

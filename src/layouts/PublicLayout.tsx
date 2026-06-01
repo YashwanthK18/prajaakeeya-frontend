@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import MenuIcon from '@mui/icons-material/Menu';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import LanguageSelector from '../components/LanguageSelector';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';

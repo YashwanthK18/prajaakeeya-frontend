@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/useAuthStore';
-import { getWardMessages, postWardMessage, ForumMessageDto } from '../services/forumService';
+import { getWardMessages, postWardMessage, deleteMessage, ForumMessageDto } from '../services/forumService';
 import { fetchWardAspirants, fetchWardAspirantsByNumber } from '../services/aspirantService';
 
 interface Message {
@@ -126,7 +126,7 @@ const WardDiscussionPage = () => {
     setDeletingMessageId(messageId);
     try {
       // call delete API
-      await (await import('../services/forumService')).deleteMessage(messageId);
+      await deleteMessage(messageId);
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
       setSuccessMsg(t('discussion.deleted') || 'Message deleted');
       setSuccessOpen(true);

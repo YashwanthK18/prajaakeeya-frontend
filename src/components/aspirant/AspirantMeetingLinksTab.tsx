@@ -27,8 +27,8 @@ import { Delete as DeleteIcon } from '@mui/icons-material';
 import apiClient from '../../services/apiClient';
 import { deleteAspirantsMeeting } from '../../services/aspirantService';
 import { useTranslation } from 'react-i18next';
-import googleMeetImg from '../../assets/images/googl-meet.png';
-import zoomImg from '../../assets/images/zoom.png';
+import googleMeetImg from '../../assets/images/googl-meet.webp';
+import zoomImg from '../../assets/images/zoom.webp';
 
 interface AspirantMeetingLinksTabProps {
     aspirantProfile: any;

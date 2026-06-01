@@ -3,7 +3,7 @@ import { Box, Typography, Link as MuiLink } from "@mui/material";
 import { motion, useAnimation } from "framer-motion";
 import { Link } from "react-router-dom";
 import { BRAND } from "../theme";
-import prajakeeyaLogo from "../assets/images/prajakeeya.png";
+import prajakeeyaLogo from "../assets/images/prajakeeya.webp";
 
 /* ── CSS keyframes injected via <style> in the DOM on every mount ── */
 const KEYFRAMES = `

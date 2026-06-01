@@ -7,7 +7,7 @@ import en from './locales/en.json'; // keep English bundled as an instant fallba
 void i18n
   // English is pre-bundled (above); every other language is fetched on demand
   // as its own chunk the first time it is selected.
-  .use(resourcesToBackend((language: string) => import(`./locales/${language}.json`)))
+  .use(resourcesToBackend((language: string) => import(`./locales/lazy/${language}.json`)))
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

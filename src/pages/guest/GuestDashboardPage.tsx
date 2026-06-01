@@ -1,10 +1,10 @@
 import { Card, CardContent, Typography, Box, Stack, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import React from 'react';
-import leaderImg from '../../assets/images/leader.png';
-import alertImg from '../../assets/images/alert.png';
-import sopImg from '../../assets/images/sop.png';
-import employeesImg from '../../assets/images/employees.png';
+import leaderImg from '../../assets/images/leader.webp';
+import alertImg from '../../assets/images/alert.webp';
+import sopImg from '../../assets/images/sop.webp';
+import employeesImg from '../../assets/images/employees.webp';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BRAND } from '../../theme';

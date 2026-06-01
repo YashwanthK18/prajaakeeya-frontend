@@ -503,6 +503,8 @@
     "booth": "Booth Name"
   },
   "userDashboard": {
+    "welcomeBack": "Welcome Back",
+    "citizensRegistered": "Citizens are registered.",
     "aspirantBanner": "Through this application, you can connect with people across multiple channels—direct meetings, video interactions, live sessions on Facebook and Instagram, and chat—while continuously evaluating yourself",
     "title": "Prajaakeeya Portal",
     "welcome": "Welcome",
@@ -561,7 +563,7 @@
       "registerAspirant": "Register as Aspirant",
       "registerAspirantDesc": "Apply to become an aspirant in your ward",
       "clickHere": "Click Here",
-      "howUPPWorks": "SOP Prajaakeeya",
+      "howUPPWorks": "SOP",
       "howPrajakeeyaWorks": "How Prajaakeeya Works",
       "howWorksTitle": "Check the SOP to understand how the Prajakeeya system works.",
       "continue": "Continue",

@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import { DarkModeRounded, LightModeRounded } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import { BRAND } from '../theme';
 import useThemeStore from '../store/useThemeStore';
 import LanguageSelector from '../components/LanguageSelector';

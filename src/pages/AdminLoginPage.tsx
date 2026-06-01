@@ -15,7 +15,7 @@ import { adminLoginWithPassword } from '../services/authService';
 import { isMockMode } from '../config/appMode';
 import * as yup from 'yup';
 import { emailSchema } from '../utils/validation';
-import prajakeeya1 from '../assets/images/prajakeeya1.webp';
+import prajakeeya1 from '../assets/images/prajakeeya.webp';
 
 interface AdminLoginForm {
   email: string;

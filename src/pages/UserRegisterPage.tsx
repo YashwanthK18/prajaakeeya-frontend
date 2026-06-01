@@ -25,7 +25,7 @@ import { getGoogleOAuthUrl } from "../services/authService";
 import useAuthStore from "../store/useAuthStore";
 import * as yup from "yup";
 import SplitAuthLayout from "../components/SplitAuthLayout";
-import prajakeeyaLogo from "../assets/images/prajakeeya.png";
+import prajakeeyaLogo from "../assets/images/prajakeeya.webp";
 interface RegisterForm {
   name: string;
 }

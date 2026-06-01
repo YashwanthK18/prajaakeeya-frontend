@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import useThemeStore from '../store/useThemeStore';
 import LanguageSelector from '../components/LanguageSelector';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import unlockImg from '../assets/images/unlock.png';
 
 /* ═══════════════ ICONS ═══════════════ */

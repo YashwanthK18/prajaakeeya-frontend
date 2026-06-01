@@ -23,19 +23,19 @@ import {
   AddAPhoto as AddAPhotoIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
-import chatImg from '../assets/images/chat.png';
-import alertImg from '../assets/images/alert.png';
-import employeesImg from '../assets/images/employees.png';
-import videoCameraImg from '../assets/images/video.png';
-import userImg from '../assets/images/user.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
+import chatImg from '../assets/images/chat.webp';
+import alertImg from '../assets/images/alert.webp';
+import employeesImg from '../assets/images/employees.webp';
+import videoCameraImg from '../assets/images/video.webp';
+import userImg from '../assets/images/user.webp';
 import king1Img from '../assets/images/king1.png';
-import sopImg from '../assets/images/sop.png';
-import meetImg from '../assets/images/meet.png';
-import leaderImg from '../assets/images/leader.png';
-import managerImg from '../assets/images/manager.png';
-import advisorImg from '../assets/images/office.png';
-import staffImg from '../assets/images/staff.png';
+import sopImg from '../assets/images/sop.webp';
+import meetImg from '../assets/images/meet.webp';
+import leaderImg from '../assets/images/leader.webp';
+import managerImg from '../assets/images/manager.webp';
+import advisorImg from '../assets/images/office.webp';
+import staffImg from '../assets/images/staff.webp';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -45,6 +45,7 @@ import { BRAND } from '../theme';
 import apiClient from '../services/apiClient';
 import { fetchAllWards } from '../services/wardService';
 import { getVoters } from '../services/voterService';
+import WardCandidateListPage from './WardCandidateListPage';
 
 const UserDashboardPage = () => {
   const { user, token } = useAuthStore();
@@ -109,7 +110,7 @@ const UserDashboardPage = () => {
   }, []);
 
   const theme = useTheme();
-  const isSm = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSm = useMediaQuery(theme.breakpoints.down('sm'), { noSsr: true });
   const [photoFrameOpen, setPhotoFrameOpen] = React.useState(false);
   const [selectedFrameIndex] = React.useState(0);
   const [photoFrameBusy, setPhotoFrameBusy] = React.useState(false);
@@ -714,8 +715,116 @@ const UserDashboardPage = () => {
     }
   }, [generatePhotoFrameBlob, selectedPhotoFrame, showPhotoFrameToast, t]);
 
+  // ── Mobile hero (matches the redesign mockup) — centered avatar, welcome
+  //    banner, name + verified tick and the registered-citizens count. Only
+  //    used on xs screens; desktop keeps the original hero + tile grid below.
+  // Warm orange → blackish gradient for the mobile hero card (matches the reference).
+  const mobileHeroBg = isDark
+    ? 'radial-gradient(135% 125% at 78% -12%, rgba(245,150,25,0.36) 0%, rgba(150,55,10,0.45) 26%, rgba(42,20,10,0.97) 60%, #0b0704 100%)'
+    : 'linear-gradient(160deg, #fff4e2 0%, #ffe7c4 48%, #fff9f0 100%)';
+  const mobileHero = (
+    <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.42 }}>
+      <Box sx={{
+        borderRadius: '20px', overflow: 'hidden', background: mobileHeroBg,
+        border: `1px solid ${isDark ? 'rgba(245,140,0,0.45)' : 'rgba(245,168,0,0.3)'}`,
+        boxShadow: isDark
+          ? '0 0 28px rgba(245,130,0,0.4), 0 0 60px rgba(200,80,0,0.2), 0 12px 40px rgba(0,0,0,0.6)'
+          : '0 0 0 1px rgba(245,168,0,0.08), 0 8px 32px rgba(17,24,39,0.07)',
+        position: 'relative',
+      }}>
+        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: gridOverlay, backgroundSize: '44px 44px', pointerEvents: 'none' }} />
+        <Box sx={{ display: 'flex', height: '4px' }}>
+          {[BRAND.red, BRAND.blue, BRAND.brown].map(c => <Box key={c} sx={{ flex: 1, bgcolor: c }} />)}
+        </Box>
+        <Stack spacing={0.375} alignItems="center" sx={{ px: 2.5, py: 2, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          <Typography sx={{ fontFamily: FF, fontWeight: 800, fontSize: '1.5rem', color: GOLD, lineHeight: 1.1 }}>
+            {isKannada ? 'ದಿ ರಿಯಲ್ ಪ್ರಜಾಕೀಯ' : 'The Real Prajaakeeya'}
+          </Typography>
+          {!isAspirant && <Box sx={{ fontSize: '1.4rem', lineHeight: 1, mt: 1 }}>👑</Box>}
+          <Stack direction="row" spacing={0.6} alignItems="center">
+            <Typography sx={{ fontFamily: FF, fontWeight: 800, fontSize: '1.5rem', color: textPrimary, lineHeight: 1.1 }}>
+              {userDisplayName}
+            </Typography>
+          </Stack>
+          {totalVoters != null && (
+            <Box sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 0.6,
+              px: 1.6, py: 0.7, borderRadius: 999, mt: 0.5,
+              background: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.7)',
+              border: `1px solid ${BORDER}`,
+            }}>
+              <Typography component="span" sx={{ fontFamily: FF, fontSize: '0.95rem', fontWeight: 800, color: GOLD }}>
+                {totalVoters.toLocaleString()}
+              </Typography>
+              <Typography component="span" sx={{ fontFamily: FF, fontSize: '0.85rem', fontWeight: 600, color: textHigh }}>
+                {t('userDashboard.citizensRegistered', { defaultValue: 'Citizens are registered.' })}
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    </motion.div>
+  );
+
+  // Aspirant-only quick tiles shown on the mobile home above the aspirants
+  // list (same actions & icons as the desktop aspirant tiles).
+  const aspirantQuickTiles = [
+    { title: t('userDashboard.actions.meetCitizens') || 'Meet Citizens', icon: <img src={meetImg} alt="meet citizens" width={30} height={30} />, path: '/user/dashboard/posts' },
+    { title: t('userDashboard.actions.videoMeetings') || 'Video Meetings', icon: <img src={videoCameraImg} alt="video meetings" width={82} height={82} style={{ objectFit: 'contain' }} />, path: '/user/dashboard/meetings' },
+    { title: t('userDashboard.actions.chatWithCitizens') || 'Chat with Citizens', icon: <img src={chatImg} alt="chat with citizens" width={30} height={30} />, path: `/user/chat/${user?.aspirantId || ''}` },
+  ];
+  const mobileAspirantTiles = (
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 1.5 }}>
+      {aspirantQuickTiles.map((action, index) => (
+        <Card
+          key={action.path}
+          onClick={() => navigate(action.path)}
+          sx={{
+            borderRadius: '16px', cursor: 'pointer',
+            background: isDark
+              ? 'radial-gradient(ellipse at 60% 0%, rgba(200,80,0,0.12) 0%, rgba(10,6,4,0.98) 55%), #0a0604'
+              : 'linear-gradient(150deg, #fffdf7 0%, #fff8e8 100%)',
+            border: `1.5px solid ${isDark
+              ? (index % 2 === 0 ? 'rgba(245,140,0,0.65)' : 'rgba(80,110,240,0.55)')
+              : (index % 2 === 0 ? 'rgba(245,168,0,0.4)' : 'rgba(37,58,154,0.35)')}`,
+            boxShadow: isDark
+              ? (index % 2 === 0 ? '0 0 14px rgba(245,130,0,0.35)' : '0 0 14px rgba(60,90,240,0.35)')
+              : '0 4px 16px rgba(245,168,0,0.07)',
+            overflow: 'hidden',
+            transition: 'transform 0.2s ease',
+            '&:active': { transform: 'scale(0.97)' },
+          }}
+        >
+          <CardContent sx={{ p: 1.5, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1, '&:last-child': { pb: 1.5 } }}>
+            <Box sx={{
+              width: 54, height: 54, borderRadius: '14px',
+              background: isDark
+                ? 'linear-gradient(145deg, #1a0f04 0%, #100a02 100%)'
+                : 'radial-gradient(circle at 30% 30%, rgba(245,168,0,0.22), rgba(245,168,0,0.06))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1.5px solid rgba(245,168,0,0.35)',
+            }}>
+              {action.icon}
+            </Box>
+            <Typography sx={{ fontFamily: FF, fontWeight: 800, color: isDark ? '#fff' : textPrimary, fontSize: '0.8rem', lineHeight: 1.15, textAlign: 'center' }}>
+              {action.title}
+            </Typography>
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
+
   return (
-    <Stack spacing={3} sx={{ fontFamily: FF, pb: { xs: 2, md: 4 } }}>
+    <>
+      {isSm ? (
+        <Stack spacing={2.5} sx={{ fontFamily: FF, pb: 2 }}>
+          {mobileHero}
+          {isAspirant && mobileAspirantTiles}
+          <WardCandidateListPage embedded />
+        </Stack>
+      ) : (
+      <Stack spacing={3} sx={{ fontFamily: FF, pb: { xs: 2, md: 4 } }}>
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.42 }}>
         <Box sx={{
           borderRadius: '20px',
@@ -950,6 +1059,8 @@ const UserDashboardPage = () => {
           </Box>
         ))}
       </Box>
+      </Stack>
+      )}
 
       <Dialog
         open={photoFrameOpen}
@@ -1135,7 +1246,7 @@ const UserDashboardPage = () => {
           {photoFrameToast.message}
         </Alert>
       </Snackbar>
-    </Stack>
+    </>
   );
 };
 

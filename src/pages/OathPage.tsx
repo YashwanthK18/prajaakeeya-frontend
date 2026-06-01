@@ -4,7 +4,7 @@ import { DarkModeRounded, LightModeRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useThemeStore from '../store/useThemeStore';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import LanguageSelector from '../components/LanguageSelector';
 
 const amountPulse = keyframes`

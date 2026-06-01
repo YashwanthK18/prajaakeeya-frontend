@@ -34,7 +34,7 @@ LocationCity as LocationCityIcon,
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/useAuthStore';
 import useThemeStore from '../store/useThemeStore';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 
 const drawerWidth = 280;
 

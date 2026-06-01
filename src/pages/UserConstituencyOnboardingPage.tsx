@@ -40,7 +40,7 @@ import { updateUserConstituencies } from "../services/authService";
 import useAuthStore from "../store/useAuthStore";
 import LanguageSelector from "../components/LanguageSelector";
 import { BRAND } from "../theme";
-import prajakeeyaLogo from "../assets/images/prajakeeya.png";
+import prajakeeyaLogo from "../assets/images/prajakeeya.webp";
 
 type Municipality = { id: number; name: string; state: string };
 type LocalBody = "municipality" | "gram_panchayat" | null;

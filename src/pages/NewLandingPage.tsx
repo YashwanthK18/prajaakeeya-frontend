@@ -15,8 +15,7 @@ import {
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { DarkModeRounded, LightModeRounded } from '@mui/icons-material';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
-import bgContent from '../assets/images/bg-content.jpg';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import aspirantLoginImg from '../assets/images/prajaakeeya_aspirant_login.png';
 import voterLoginImg from '../assets/images/prajaakeeya_voter_login.png';
 import { useNavigate } from 'react-router-dom';
@@ -60,10 +59,6 @@ const BeatterCreatePage: React.FC = () => {
     return (
         <Box sx={{
             height: isMobile ? 'auto' : '100vh',
-            backgroundImage: `url(${bgContent})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
             overflow: isMobile ? 'auto' : 'hidden',
             display: 'flex',
             flexDirection: 'column',

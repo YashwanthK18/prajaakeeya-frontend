@@ -154,7 +154,10 @@ const UserChatPage: React.FC = () => {
                                         px: 2.5,
                                         py: 1.75,
                                         borderRadius: 2,
-                                        maxWidth: { xs: '90%', sm: '75%' }
+                                        minWidth: 0,
+                                        maxWidth: { xs: '90%', sm: '75%' },
+                                        overflowWrap: 'anywhere',
+                                        wordBreak: 'break-word'
                                     }}>
                                         {!isMe && (
                                             <Stack direction="row" spacing={1} alignItems="center">
@@ -162,7 +165,7 @@ const UserChatPage: React.FC = () => {
                                                 {isAspirant && <Chip size="small" label={t('discussion.labels.aspirant') || 'Aspirant'} sx={{ bgcolor: '#FFF7ED', color: '#F97316', fontWeight: 600, fontSize: '0.6rem', height: 20, borderRadius: 6 }} />}
                                             </Stack>
                                         )}
-                                        <Typography variant="body2">{m.content}</Typography>
+                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>{m.content}</Typography>
                                         <Typography variant="caption" sx={{ display: 'block', mt: 0.5, opacity: 0.8 }}>{new Date(m.createdAt).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</Typography>
                                     </Box>
                                 </Stack>

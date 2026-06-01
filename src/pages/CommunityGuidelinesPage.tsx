@@ -32,7 +32,7 @@ import { DarkModeRounded, LightModeRounded } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import prajakeeyaLogo from "../assets/images/prajakeeya.png";
+import prajakeeyaLogo from "../assets/images/prajakeeya.webp";
 import { BRAND } from "../theme";
 import useThemeStore from "../store/useThemeStore";
 import LanguageSelector from "../components/LanguageSelector";

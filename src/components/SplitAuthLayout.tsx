@@ -9,7 +9,7 @@ import { DarkModeRounded, LightModeRounded } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { ReactNode, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import prajakeeyaLogo from "../assets/images/prajakeeya.png";
+import prajakeeyaLogo from "../assets/images/prajakeeya.webp";
 import AuthFooter from "./AuthFooter";
 import LanguageSelector from "./LanguageSelector";
 import { BRAND, PARTICLE_COLORS } from "../theme";

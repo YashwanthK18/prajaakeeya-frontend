@@ -99,7 +99,8 @@ const hrefFor = (n: ApiNotification): string | undefined => {
       return n.aspirantId ? `/user/chat/${n.aspirantId}` : undefined;
     case 'meeting':
       return '/user/dashboard/meetings';
-    case 'aspirant_meeting': {
+    case 'aspirant_meeting':
+    case 'aspirant_visit': {
       const params = new URLSearchParams();
       if (n.electionId != null) params.set('electionId', String(n.electionId));
       if (n.aspirantId != null) params.set('aspirantId', String(n.aspirantId));

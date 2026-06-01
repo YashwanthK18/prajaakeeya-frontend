@@ -11,17 +11,26 @@ import {
   Container,
   IconButton,
   useTheme,
+  Paper,
+  BottomNavigation,
+  BottomNavigationAction,
 } from '@mui/material';
 import {
   Logout as LogoutIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   ArrowBack as ArrowBackIcon,
+  HomeRounded as HomeRoundedIcon,
+  ReportProblemRounded as ReportProblemRoundedIcon,
+  GroupsRounded as GroupsRoundedIcon,
+  DescriptionRounded as DescriptionRoundedIcon,
+  PersonAddAlt1Rounded as PersonAddAlt1RoundedIcon,
+  PersonRounded as PersonRoundedIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/useAuthStore';
 import useThemeStore from '../store/useThemeStore';
-import prajakeeyaLogo from '../assets/images/prajakeeya.png';
+import prajakeeyaLogo from '../assets/images/prajakeeya.webp';
 import { BRAND } from '../theme';
 import LanguageSelector from '../components/LanguageSelector';
 import NotificationBell from '../components/NotificationBell';
@@ -67,6 +76,26 @@ const UserLayout = () => {
   const wardNumber = displayUser.wardNumber || displayUser.wardId || null;
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  // ── Mobile bottom navigation (xs only). Mirrors the dashboard's primary
+  //    actions; the dashboard "Home" now shows the aspirants list with tabs.
+  //    For a fully-registered aspirant the last tab becomes "My Profile"
+  //    instead of "Register Aspirant" (mirrors the dashboard tile logic). ──
+  const isAspirant = user?.role === 'aspirant' && (user as any)?.documentStatus === 'completed';
+  const bottomNavItems = [
+    { label: t('common.home', { defaultValue: 'Home' }), icon: <HomeRoundedIcon />, path: '/user/dashboard' },
+    { label: t('userDashboard.actions.civicIssues', { defaultValue: 'Civic Issues' }), icon: <ReportProblemRoundedIcon />, path: '/user/civic-issues' },
+    { label: t('userDashboard.actions.registeredAspirants', { defaultValue: 'Aspirants' }), icon: <GroupsRoundedIcon />, path: '/user/registered-aspirants' },
+    { label: t('userDashboard.actions.howUPPWorks', { defaultValue: 'SOP' }), icon: <DescriptionRoundedIcon />, path: '/user/sop' },
+    isAspirant
+      ? { label: t('userDashboard.actions.myProfile', { defaultValue: 'My Profile' }), icon: <PersonRoundedIcon />, path: '/user/dashboard/profile' }
+      : { label: t('userDashboard.actions.registerAspirant', { defaultValue: 'Register Aspirant' }), icon: <PersonAddAlt1RoundedIcon />, path: '/user/aspirants/register' },
+  ];
+  const currentNavIndex = bottomNavItems.findIndex((item) =>
+    item.path === '/user/dashboard'
+      ? location.pathname === '/user/dashboard'
+      : location.pathname.startsWith(item.path)
+  );
 
   // Theme-aware colour helpers
   const navBg = isDark
@@ -253,9 +282,64 @@ const UserLayout = () => {
         </Container>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 5 } }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 3, sm: 4, md: 5 }, pb: { xs: 'calc(90px + env(safe-area-inset-bottom))', sm: 4, md: 5 } }}>
         <Outlet />
       </Container>
+
+      {/* Mobile bottom navigation — fixed, xs only */}
+      <Paper
+        elevation={0}
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: (theme) => theme.zIndex.appBar,
+          // Solid opaque base so page content scrolling underneath never shows
+          // through; the gradient sits on top via backgroundImage.
+          backgroundColor: isDark ? '#0a0808' : '#ffffff',
+          backgroundImage: navBg,
+          borderTop: `1px solid ${theme.palette.divider}`,
+          pb: 'calc(8px + env(safe-area-inset-bottom))',
+        }}
+      >
+        <BottomNavigation
+          showLabels
+          value={currentNavIndex === -1 ? false : currentNavIndex}
+          onChange={(_, newValue) => navigate(bottomNavItems[newValue].path)}
+          sx={{
+            bgcolor: 'transparent',
+            height: 62,
+            alignItems: 'flex-start',
+            pt: 1,
+            '& .MuiBottomNavigationAction-root': {
+              minWidth: 0,
+              px: 0.5,
+              // Anchor icon + label to the top so every icon lines up on the
+              // same row regardless of how many lines its label wraps to.
+              justifyContent: 'flex-start',
+              gap: 0.5,
+              color: isDark ? '#fff' : 'rgba(17,24,39,0.5)',
+            },
+            '& .MuiBottomNavigationAction-root.Mui-selected': {
+              color: isDark ? BRAND.yellow : BRAND.saffron,
+            },
+            '& .MuiBottomNavigationAction-label': {
+              mt: 0,
+              lineHeight: 1.2,
+              fontFamily: FF,
+              fontWeight: 700,
+              fontSize: '0.62rem',
+              '&.Mui-selected': { fontSize: '0.64rem' },
+            },
+          }}
+        >
+          {bottomNavItems.map((item) => (
+            <BottomNavigationAction key={item.path} label={item.label} icon={item.icon} />
+          ))}
+        </BottomNavigation>
+      </Paper>
     </Box>
   );
 };
