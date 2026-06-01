@@ -445,7 +445,21 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
     if (urlType === 'municipal_corporation' || urlType === 'gram_panchayat') return 'ward_panchayat';
     return 'mp';
   })();
-  const [activeTab, setActiveTab] = useState<AspirantTab>(initialTabFromUrl);
+  // Persist the selected tab (sessionStorage) so navigating away — e.g. to the
+  // chat page — and coming back keeps the same tab instead of resetting to MP.
+  // Only applies in tab-selector mode; a `?type=` deep-link always wins.
+  const [activeTab, setActiveTab] = useState<AspirantTab>(() => {
+    if (urlType) return initialTabFromUrl;
+    try {
+      const saved = sessionStorage.getItem('wardlist_active_tab');
+      if (saved === 'mp' || saved === 'mla' || saved === 'ward_panchayat') return saved;
+    } catch { /* ignore */ }
+    return initialTabFromUrl;
+  });
+  useEffect(() => {
+    if (urlType) return;
+    try { sessionStorage.setItem('wardlist_active_tab', activeTab); } catch { /* ignore */ }
+  }, [activeTab, urlType]);
   const autoElectionType = urlType ?? tabToElectionType(activeTab);
   // Path passed to the aspirant-register page — carries the current election
   // type so the CandidateInformationStep can pre-select the matching tab.
@@ -770,6 +784,27 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
     next.delete('aspirantId');
     setSearchParams(next, { replace: true });
   }, [candidates, searchParams, setSearchParams]);
+
+  // Returning from the chat page: scroll back to the aspirant card the user
+  // opened chat from (set in sessionStorage on click) instead of jumping to top.
+  // NOTE: no clearable cleanup here — under React StrictMode the effect runs
+  // twice and a cleanup would cancel the scroll; we instead fire uncancelled
+  // deferred scrolls (harmless if the element is gone) so it survives.
+  useEffect(() => {
+    if (loading) return;
+    let raw: string | null = null;
+    try { raw = sessionStorage.getItem('wardlist_return_aspirant'); } catch { /* ignore */ }
+    if (!raw) return;
+    const aid = Number(raw);
+    if (!Number.isFinite(aid) || !candidates.some((c) => c.id === aid)) return;
+    if (!document.getElementById(`aspirant-card-${aid}`)) return;
+    try { sessionStorage.removeItem('wardlist_return_aspirant'); } catch { /* ignore */ }
+    const scrollToCard = () => document.getElementById(`aspirant-card-${aid}`)?.scrollIntoView({ block: 'center' });
+    // Several attempts so it survives late layout shifts (images loading, etc.).
+    requestAnimationFrame(scrollToCard);
+    window.setTimeout(scrollToCard, 150);
+    window.setTimeout(scrollToCard, 450);
+  }, [candidates, loading]);
 
   // Fetch elections on mount & restore saved election filter
   useEffect(() => {
@@ -2993,6 +3028,9 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                               }}
                               onClick={() => {
                                 void trackInteraction(candidate.id);
+                                // Remember which card we left from so we can scroll back
+                                // to it when the user returns from the chat page.
+                                try { sessionStorage.setItem('wardlist_return_aspirant', String(candidate.id)); } catch { /* ignore */ }
                                 navigate(`/user/chat/${candidate.id}`, { state: { candidate } });
                               }}
                             >
