@@ -1,0 +1,88 @@
+# Auto-deploy the frontend to S3 + CloudFront on every push to main.
+# Auth is keyless via GitHub OIDC (assumes an IAM role — no AWS keys stored).
+
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main, staging]   # main → production, staging → staging
+  workflow_dispatch: {}         # lets you trigger manually from the Actions tab
+
+concurrency:                    # never let two deploys of the SAME branch race
+  group: deploy-frontend-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write               # required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_APP_MODE: ${{ vars.VITE_APP_MODE }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+
+      # Pick the target bucket + distribution based on the branch that triggered
+      # this run. main → production, anything else (staging) → staging.
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "bucket=prajaakeeya-frontend"          >> "$GITHUB_OUTPUT"
+            echo "dist=E4MRGE3YYYD1J"                   >> "$GITHUB_OUTPUT"
+          else
+            echo "bucket=prajaakeeya-frontend-staging"  >> "$GITHUB_OUTPUT"
+            echo "dist=E322GXCJRA1CAW"                  >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure AWS credentials (OIDC, keyless)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Hashed assets → cache hard for a year (filenames change every build).
+      - name: Sync immutable assets
+        run: |
+          aws s3 sync dist/ s3://${{ steps.env.outputs.bucket }}/ \
+            --delete \
+            --exclude "index.html" \
+            --exclude "sw.js" \
+            --exclude "registerSW.js" \
+            --exclude "manifest.webmanifest" \
+            --cache-control "public,max-age=31536000,immutable"
+
+      # Entry + service-worker files → never cache, so releases go live instantly.
+      - name: Sync no-cache entry + service-worker files
+        run: |
+          B="${{ steps.env.outputs.bucket }}"
+          aws s3 cp dist/index.html s3://$B/index.html \
+            --cache-control "no-cache,no-store,must-revalidate" --content-type "text/html"
+          [ -f dist/sw.js ] && aws s3 cp dist/sw.js s3://$B/sw.js \
+            --cache-control "no-cache,no-store,must-revalidate" --content-type "application/javascript" || true
+          [ -f dist/registerSW.js ] && aws s3 cp dist/registerSW.js s3://$B/registerSW.js \
+            --cache-control "no-cache,no-store,must-revalidate" --content-type "application/javascript" || true
+          [ -f dist/manifest.webmanifest ] && aws s3 cp dist/manifest.webmanifest s3://$B/manifest.webmanifest \
+            --cache-control "no-cache" --content-type "application/manifest+json" || true
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.env.outputs.dist }} \
+            --paths "/" "/index.html" "/sw.js" "/registerSW.js" "/manifest.webmanifest"
