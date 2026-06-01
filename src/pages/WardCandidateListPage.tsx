@@ -179,7 +179,15 @@ const isDemoCandidate = (c: any): boolean => Boolean(c?.isDemo);
 
 const FILTER_STORAGE_KEY = 'wardCandidateFilters';
 
-const WardCandidateListPage = () => {
+interface WardCandidateListPageProps {
+  /** When rendered inside another page (e.g. the mobile dashboard home),
+   *  hide the top Home / Public Issue buttons row and the "Aspirants" page
+   *  header so the host page can supply its own hero. The standalone
+   *  /user/aspirantslist route renders with embedded=false and is unchanged. */
+  embedded?: boolean;
+}
+
+const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps = {}) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const GOLD = isDark ? BRAND.yellow : BRAND.yellowLight;
@@ -1050,6 +1058,9 @@ const WardCandidateListPage = () => {
   const loadAspirants = useCallback(async (electionId: number, constituencyId: number) => {
       try {
         setLoading(true);
+        // Clear stale cards so the list area shows the loader (not the previous
+        // tab's aspirants) while the new constituency's data is fetched.
+        setCandidates([]);
         const { data } = await fetchAspirantsByConstituency(electionId, constituencyId, useAuthStore.getState().user?.id);
         const list = Array.isArray(data) ? data : (data as any)?.data ?? [];
         const approved = list.filter((c: any) => c.status === 'approved' && c.documentStatus === 'completed');
@@ -1260,17 +1271,11 @@ const WardCandidateListPage = () => {
     return () => clearInterval(id);
   }, [aspirantMeetings]);
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress sx={{ color: BRAND.red }} />
-      </Box>
-    );
-  }
-
   return (
     <>
-      {/* Home & Report Issue buttons */}
+      {/* Home & Report Issue buttons — hidden when embedded in the dashboard,
+          which provides its own navigation (hero + bottom nav). */}
+      {!embedded && (
       <Box
         sx={{
           px: 2,
@@ -1363,6 +1368,7 @@ const WardCandidateListPage = () => {
           })()}
         </Stack>
       </Box>
+      )}
 
       <Stack className="ward-candidates-page" spacing={3}>
         {/* Voting window notification (temporarily disabled) */}
@@ -1410,8 +1416,8 @@ const WardCandidateListPage = () => {
           </Box>
         )} */}
 
-        {/* Page header (hidden when a voting window is present so the banner appears directly above filters) */}
-        {!votingWindow && (
+        {/* Page header (hidden when a voting window is present so the banner appears directly above filters, and when embedded in the dashboard which has its own hero) */}
+        {!embedded && !votingWindow && (
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'center', md: 'center' }} justifyContent="space-between" spacing={2}>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
               <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: textPrimary, fontFamily: '"Baloo 2", cursive', letterSpacing: '-0.5px' }}>
@@ -2036,8 +2042,16 @@ const WardCandidateListPage = () => {
           </Box>
         )}
 
+        {/* Inline loader — keeps the tabs / constituency header visible above
+            while only the list area below shows a spinner during a tab switch. */}
+        {loading && (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="320px">
+            <CircularProgress sx={{ color: BRAND.red }} />
+          </Box>
+        )}
+
         {/* "No candidates yet" + "Register as aspirant" — shown when only demo is present */}
-        {candidates.length > 0 && candidates.every(c => isDemoCandidate(c)) && user && (user.role !== 'aspirant' || aspirantStatus === 'pending') && (
+        {!loading && candidates.length > 0 && candidates.every(c => isDemoCandidate(c)) && user && (user.role !== 'aspirant' || aspirantStatus === 'pending') && (
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5} alignItems="stretch" sx={{ width: '100%' }}>
             {/* No candidates yet card */}
             <Box sx={{
@@ -3790,11 +3804,11 @@ const WardCandidateListPage = () => {
         </AnimatePresence>
       </Portal>
 
-      {/* Scroll-to-top FAB */}
+      {/* Scroll-to-top FAB — raised on mobile so it clears the bottom nav */}
       <Box
         sx={{
           position: 'fixed',
-          bottom: 28,
+          bottom: { xs: 'calc(82px + env(safe-area-inset-bottom))', sm: 28 },
           right: 20,
           zIndex: 1200,
           opacity: showScrollTop ? 1 : 0,
