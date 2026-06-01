@@ -50,8 +50,6 @@ import {
   InfoOutlined as InfoOutlinedIcon,
   AccountBalance as ParliamentIcon,
   Gavel as GavelIcon,
-  LocationCity as CityIcon,
-  Agriculture as VillageIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -1452,7 +1450,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                 : hasGp
                   ? (t('userDashboard.actions.myGramPanchayatAspirants') || 'My Gram Panchayat Aspirants')
                   : (t('pages.wardCandidates.tabWardPanchayat') || 'My Ward / Panchayat Aspirants');
-              const wardTabIcon = hasGp && !hasMunicipal ? VillageIcon : CityIcon;
+              const wardTabIcon = PlaceIcon;
               const tabs: { key: AspirantTab; label: string; Icon: typeof ParliamentIcon; inactiveImg?: string; activeImg?: string }[] = [
                 { key: 'mp', label: t('userDashboard.actions.myLokSabhaAspirants') || 'My Lok Sabha Aspirants', Icon: ParliamentIcon },
                 { key: 'mla', label: t('userDashboard.actions.myStateAssemblyAspirants') || 'My State Assembly Aspirants', Icon: GavelIcon, inactiveImg: capitolInactiveImg, activeImg: capitolActiveImg },
@@ -3048,6 +3046,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                             <Box
                               sx={{ width: '100%' }}
                               onClick={finalDisabled ? () => {
+                                (document.activeElement as HTMLElement | null)?.blur();
                                 if ((hasVoted || user?.hasVoted) && isVotingActiveForThisElection) {
                                   setVoteThankOpen(true);
                                 } else {
@@ -3069,7 +3068,11 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                                   '&:hover': { background: `linear-gradient(135deg, #16a34a 0%, ${BRAND.green} 100%)`, boxShadow: '0 5px 16px rgba(37,58,154,0.6)' },
                                   '&.Mui-disabled': { background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(17,24,39,0.12)', color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(17,24,39,0.38)', boxShadow: 'none' },
                                 }}
-                                onClick={!finalDisabled ? async () => {
+                                onClick={!finalDisabled ? async (e) => {
+                                  // Release focus before the thank-you dialog opens, otherwise
+                                  // the dialog sets aria-hidden on #root while this button is
+                                  // still focused (accessibility warning).
+                                  (e.currentTarget as HTMLElement).blur();
                                   try {
                                     setPosting(true);
                                     // Send only aspirantId as requested by API
