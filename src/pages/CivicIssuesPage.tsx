@@ -156,6 +156,13 @@ const CivicIssuesPage: React.FC = () => {
     return null;
   };
   const [activeTab, setActiveTab] = useState<CivicTab>('mp');
+  // The page can arrive with a deep-link election filter (from the aspirants
+  // list "Public Issue" button). That filter must only drive the tab it points
+  // to — once the user manually switches tabs, it should be ignored so each tab
+  // shows (and reports against) its own election. This flag flips on the first
+  // manual tab change; the deep-link's own auto-selection does NOT set it.
+  const [userSwitchedTab, setUserSwitchedTab] = useState(false);
+  const useDeepLinkFilter = Boolean(filterElectionId && filterConstituencyId && !userSwitchedTab);
 
   const [raisingCat, setRaisingCat] = useState<string | null>(null);
   const [snack, setSnack] = useState<{ open: boolean; msg: string; severity: 'success' | 'error' | 'info' }>({ open: false, msg: '', severity: 'success' });
@@ -209,7 +216,7 @@ const CivicIssuesPage: React.FC = () => {
     // user's saved constituency for that type.
     let eId: number | null = null;
     let cId: number | null = null;
-    if (filterElectionId && filterConstituencyId) {
+    if (useDeepLinkFilter) {
       eId = Number(filterElectionId);
       cId = Number(filterConstituencyId);
     } else {
@@ -248,7 +255,7 @@ const CivicIssuesPage: React.FC = () => {
       inFlightIssuesRef.current = null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterElectionId, filterConstituencyId, selectedElectionId, selectedElectionType, user, t]);
+  }, [useDeepLinkFilter, filterElectionId, filterConstituencyId, selectedElectionId, selectedElectionType, user, t]);
 
   useEffect(() => {
     fetchData();
@@ -489,11 +496,11 @@ const CivicIssuesPage: React.FC = () => {
 
   const handleRaise = async (category: IssueCategory) => {
     const userConstId = userConstituencyIdForType(selectedElectionType);
-    const hasContext = (filterElectionId && filterConstituencyId) || (selectedElectionId && userConstId != null);
+    const hasContext = useDeepLinkFilter || (selectedElectionId && userConstId != null);
     if (!hasContext || category.isRaised) return;
     try {
       setRaisingCat(category.name);
-      if (filterElectionId && filterConstituencyId) {
+      if (useDeepLinkFilter) {
         await raiseHandForCategoryByElectionConstituency(filterElectionId, filterConstituencyId, category.name);
       } else if (selectedElectionId && userConstId != null) {
         await raiseHandForCategoryByElectionConstituency(Number(selectedElectionId), userConstId, category.name);
@@ -624,7 +631,7 @@ const CivicIssuesPage: React.FC = () => {
                 return (
                   <Box
                     key={key}
-                    onClick={() => setActiveTab(key)}
+                    onClick={() => { setActiveTab(key); setUserSwitchedTab(true); }}
                     sx={{
                       flex: 1,
                       cursor: 'pointer',
