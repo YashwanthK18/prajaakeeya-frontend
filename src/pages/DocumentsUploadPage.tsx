@@ -387,7 +387,7 @@ const DocumentsUploadPage = () => {
         documents={documents}
         setDocuments={setDocuments}
         handleFileUpload={handleFileUpload}
-        onBack={() => navigate('/user/aspirants/register', { state: { goToStep: 1, resume: true } })}
+        onBack={() => navigate('/user/aspirants/register', { state: { resume: true } })}
         onNext={handleNext}
         onCancel={handleHome}
         canProceed={canProceedStep4}

@@ -60,6 +60,7 @@ const UserDashboardPage = lazy(() => import("./pages/UserDashboardPage"));
 const CivicIssuesPage = lazy(() => import("./pages/CivicIssuesPage"));
 const ReportIssuePage = lazy(() => import("./pages/ReportIssuePage"));
 const CivicIssueDetailPage = lazy(() => import("./pages/CivicIssueDetailPage"));
+const AspirantDeclarationPage = lazy(() => import("./pages/AspirantDeclarationPage"));
 const AspirantRegistrationPage = lazy(() => import("./pages/AspirantRegistrationPage"));
 const DocumentsUploadPage = lazy(() => import("./pages/DocumentsUploadPage"));
 // SOP upload step removed from aspirant registration flow
@@ -343,6 +344,10 @@ const App = () => {
             <Route
               path="dashboard/requests"
               element={<AspirantRequestsPage />}
+            />
+            <Route
+              path="aspirants/declaration"
+              element={<AspirantDeclarationPage />}
             />
             <Route
               path="aspirants/register"

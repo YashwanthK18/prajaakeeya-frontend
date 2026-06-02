@@ -23,7 +23,6 @@ import useAuthStore from '../store/useAuthStore';
 import { createAspirantSchema } from '../utils/validation';
 import { fetchElections as fetchElectionsList, type Election } from '../services/electionService';
 import { registerAspirant, type AspirantPayload, getAspirantById } from '../services/aspirantService';
-import DeclarationStep from '../components/aspirant/DeclarationStep';
 import CandidateInformationStep from '../components/aspirant/CandidateInformationStep';
 
 interface AspirantForm {
@@ -53,52 +52,35 @@ const AspirantRegistrationPage = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeStep, setActiveStep] = useState(0);
   const SOP_AGREED_KEY = `aspirant_sop_agreed_${user?.id ?? 'guest'}`;
   const DECLARATION_KEY = `aspirant_declaration_${user?.id ?? 'guest'}`;
-  const [sopAgreed, setSopAgreed] = useState<boolean>(() => {
-    try { return localStorage.getItem(SOP_AGREED_KEY) === 'true'; } catch { return false; }
-  });
   const [answers, setAnswers] = useState<string[]>(Array(9).fill(''));
   const [aspirantResp, setAspirantResp] = useState<any | null>(null);
-  const [declarationChecks, setDeclarationChecks] = useState<{ agreed: boolean }>(() => {
-    try {
-      const raw = localStorage.getItem(DECLARATION_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      return { agreed: Boolean(parsed?.declarationChecks?.agreed) };
-    } catch { return { agreed: false }; }
-  });
-  const [digitalSignature, setDigitalSignature] = useState<string>(() => {
-    try {
-      const raw = localStorage.getItem(DECLARATION_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      return typeof parsed?.digitalSignature === 'string' ? parsed.digitalSignature : '';
-    } catch { return ''; }
-  });
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Re-read sopAgreed flag when navigating back from /user/sop
-  useEffect(() => {
-    try { setSopAgreed(localStorage.getItem(SOP_AGREED_KEY) === 'true'); } catch { /* ignore */ }
-  }, [location.key, SOP_AGREED_KEY]);
-
-  // Persist sopAgreed when the user toggles the checkbox in the declaration step
-  const handleSopAgreedChange = (v: boolean) => {
-    setSopAgreed(v);
+  // The Declaration step (SOP agreement + signature) is its own page now
+  // (`/user/aspirants/declaration`). It must be completed before reaching this
+  // Candidate Information page. If it isn't — and the user hasn't already
+  // registered — send them back to the Declaration page (forwarding any
+  // `?type=` query). An existing aspirant editing their details is allowed in.
+  const declarationDone = (() => {
     try {
-      if (v) localStorage.setItem(SOP_AGREED_KEY, 'true');
-      else localStorage.removeItem(SOP_AGREED_KEY);
-    } catch { /* ignore */ }
-  };
-
-  // Persist declaration fields so navigating to /user/sop and back doesn't reset them
+      const sop = localStorage.getItem(SOP_AGREED_KEY) === 'true';
+      const raw = localStorage.getItem(DECLARATION_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const agreed = Boolean(parsed?.declarationChecks?.agreed);
+      const signed = typeof parsed?.digitalSignature === 'string' && parsed.digitalSignature.trim().length > 0;
+      return sop && agreed && signed;
+    } catch { return false; }
+  })();
+  const mustRedirectToDeclaration = !user?.aspirantId && !declarationDone;
   useEffect(() => {
-    try {
-      localStorage.setItem(DECLARATION_KEY, JSON.stringify({ digitalSignature, declarationChecks }));
-    } catch { /* ignore */ }
-  }, [digitalSignature, declarationChecks, DECLARATION_KEY]);
+    if (mustRedirectToDeclaration) {
+      navigate(`/user/aspirants/declaration${location.search}`, { replace: true });
+    }
+  }, [mustRedirectToDeclaration, location.search, navigate]);
 
   // Election type ref for dynamic age validation in yup schema
   const electionsRef = useRef<Election[]>([]);
@@ -206,31 +188,6 @@ const AspirantRegistrationPage = () => {
     }
   }, [watchedValues, answers, DRAFT_KEY]);
 
-  // When returning from the Documents page via "Back", jump straight to the
-  // Candidate Information step (step 2 = activeStep 1) and suppress the
-  // auto-redirect-to-documents below so the user can edit their details.
-  const skipAutoRedirectRef = useRef<boolean>(
-    typeof (location as any)?.state?.goToStep === 'number'
-  );
-  useEffect(() => {
-    const goToStep = (location as any)?.state?.goToStep;
-    if (typeof goToStep === 'number') {
-      skipAutoRedirectRef.current = true;
-      setActiveStep(goToStep);
-      window.scrollTo(0, 0);
-    }
-  }, [location.key]);
-
-  // On initial load, navigate to Documents page if user already has an aspirant record
-  const hasSkippedToDocsRef = useRef(false);
-  useEffect(() => {
-    if (user?.aspirantId && !hasSkippedToDocsRef.current && !skipAutoRedirectRef.current && activeStep === 0 && !loading) {
-      hasSkippedToDocsRef.current = true;
-      navigate('/user/aspirants/documents', { replace: true });
-    }
-  }, [user?.aspirantId, activeStep, loading, navigate]);
-
-
   useEffect(() => {
     if (!aspirantResp?.id) return;
 
@@ -268,13 +225,10 @@ const AspirantRegistrationPage = () => {
     }
   }, [aspirantResp, setValue]);
 
-  // Ensure Declaration step always scrolls to top when activated
+  // Always scroll to top on mount
   useEffect(() => {
-    if (activeStep === 0) {
-      // Use instant jump to avoid any downward scrolling animation
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }
-  }, [activeStep]);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   const handleResetCandidateWritableFields = () => {
     resetField('phone', { defaultValue: user?.phone || '' });
@@ -291,29 +245,19 @@ const AspirantRegistrationPage = () => {
   };
 
   const handleNext = async () => {
-    if (activeStep === 0) {
-      setActiveStep(1);
-      window.scrollTo(0, 0);
+    const valid = await trigger(['name', 'electionId', 'constituencyId', 'manifesto', 'party', 'age', 'education', 'occupation', 'address']);
+    if (!valid) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-
-    if (activeStep === 1) {
-      const valid = await trigger(['name', 'electionId', 'constituencyId', 'manifesto', 'party', 'age', 'education', 'occupation', 'address']);
-      if (!valid) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-      await handleSubmitRegistration(false);
-      return;
-    }
-
-    setActiveStep((prev) => prev + 1);
-    window.scrollTo(0, 0);
+    await handleSubmitRegistration(false);
   };
 
+  // Back returns to the Declaration page (the previous step). Flag the
+  // navigation so the Declaration page does NOT auto-skip to Documents even
+  // when an aspirant record already exists — the user explicitly went back.
   const handleBack = () => {
-    setActiveStep((prev) => prev - 1);
-    window.scrollTo(0, 0);
+    navigate(`/user/aspirants/declaration${location.search}`, { state: { fromRegister: true } });
   };
 
   const handleHome = () => {
@@ -455,10 +399,9 @@ const AspirantRegistrationPage = () => {
     }
   };
 
-  const canProceedStep6 =
-    declarationChecks.agreed &&
-    digitalSignature.trim().length > 0 &&
-    sopAgreed;
+  // While the declaration guard is redirecting, render nothing to avoid a flash
+  // of the candidate form.
+  if (mustRedirectToDeclaration) return null;
 
   return (
     <Stack spacing={3}>
@@ -480,41 +423,21 @@ const AspirantRegistrationPage = () => {
       )}
 
       <form>
-        {activeStep === 0 && (
-          <DeclarationStep
-            sopAgreed={sopAgreed}
-            setSopAgreed={handleSopAgreedChange}
-            onSopClick={() => navigate('/user/sop', { state: { from: 'aspirant-registration' } })}
-            declarationChecks={declarationChecks}
-            setDeclarationChecks={setDeclarationChecks}
-            digitalSignature={digitalSignature}
-            setDigitalSignature={setDigitalSignature}
-            canProceed={canProceedStep6}
-            loading={false}
-            onBack={() => navigate(-1)}
-            onSubmit={() => { setActiveStep(1); window.scrollTo(0, 0); }}
-            onCancel={handleHome}
-          />
-        )}
-
-        {activeStep === 1 && (
-          <CandidateInformationStep
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-            trigger={trigger}
-            setError={setFormError}
-            clearErrors={clearErrors}
-            reset={handleResetCandidateWritableFields}
-            loading={loading}
-            user={user}
-            onNext={handleNext}
-            onBack={handleBack}
-            onCancel={handleHome}
-          />
-        )}
-
+        <CandidateInformationStep
+          register={register}
+          errors={errors}
+          watch={watch}
+          setValue={setValue}
+          trigger={trigger}
+          setError={setFormError}
+          clearErrors={clearErrors}
+          reset={handleResetCandidateWritableFields}
+          loading={loading}
+          user={user}
+          onNext={handleNext}
+          onBack={handleBack}
+          onCancel={handleHome}
+        />
       </form>
 
       <Snackbar
@@ -533,7 +456,6 @@ const AspirantRegistrationPage = () => {
         onClose={() => {
           setSuccessDialogOpen(false);
           reset();
-          setActiveStep(0);
           navigate('/user/dashboard', { replace: true });
         }}
         maxWidth="sm"
@@ -604,7 +526,6 @@ const AspirantRegistrationPage = () => {
             onClick={() => {
               setSuccessDialogOpen(false);
               reset();
-              setActiveStep(0);
               navigate('/user/dashboard', { replace: true });
             }}
             sx={{

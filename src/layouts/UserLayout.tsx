@@ -50,7 +50,7 @@ const UserLayout = () => {
   const isVotersPage = location.pathname === '/user/voters';
   const isCivicIssuesPage = location.pathname === '/user/civic-issues';
   const isSopPage = location.pathname === '/user/sop';
-  const isAspirantRegister = location.pathname === '/user/aspirants/register';
+  const isAspirantRegister = location.pathname === '/user/aspirants/register' || location.pathname === '/user/aspirants/declaration';
   const isNotificationsPage = location.pathname === '/user/notifications';
 
   const [aspirantName, setAspirantName] = useState<string | null>(null);
@@ -89,7 +89,7 @@ const UserLayout = () => {
     { label: t('userDashboard.actions.howUPPWorks', { defaultValue: 'SOP' }), icon: <DescriptionRoundedIcon />, path: '/user/sop' },
     isAspirant
       ? { label: t('userDashboard.actions.myProfile', { defaultValue: 'My Profile' }), icon: <PersonRoundedIcon />, path: '/user/dashboard/profile' }
-      : { label: t('userDashboard.actions.registerAspirant', { defaultValue: 'Register Aspirant' }), icon: <PersonAddAlt1RoundedIcon />, path: '/user/aspirants/register' },
+      : { label: t('userDashboard.actions.registerAspirant', { defaultValue: 'Register Aspirant' }), icon: <PersonAddAlt1RoundedIcon />, path: '/user/aspirants/declaration' },
   ];
   const currentNavIndex = bottomNavItems.findIndex((item) =>
     item.path === '/user/dashboard'

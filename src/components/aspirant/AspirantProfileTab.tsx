@@ -138,7 +138,7 @@ const AspirantProfileTab: React.FC<AspirantProfileTabProps> = ({ aspirantProfile
                 <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-start' }, mb: 3 }}>
                     <Button
                         variant="contained"
-                        onClick={() => { setContinuing(true); navigate('/user/aspirants/register', { state: { resume: true } }); }}
+                        onClick={() => { setContinuing(true); navigate('/user/aspirants/declaration', { state: { resume: true } }); }}
                         disabled={continuing}
                         startIcon={continuing ? <CircularProgress size={18} color="inherit" /> : undefined}
                         sx={{

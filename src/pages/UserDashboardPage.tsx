@@ -313,16 +313,20 @@ const UserDashboardPage = () => {
     const disabledForThis = (isAspirantRegistrationComplete && action.path === '/user/aspirants/register') || (action as any).disabled;
     if (disabledForThis) return;
 
+    // The aspirant flow now starts on the standalone Declaration page.
+    const target = action.path === '/user/aspirants/register'
+      ? '/user/aspirants/declaration'
+      : action.path;
     try {
       if (action.path === '/user/aspirants/register' && shouldShowContinue) {
-        navigate(action.path, { state: { resume: true } });
+        navigate(target, { state: { resume: true } });
         return;
       }
 
-      navigate(action.path);
+      navigate(target);
     } catch (err) {
       console.warn('[handleActionClick] error', err);
-      navigate(action.path);
+      navigate(target);
     }
   };
 
@@ -829,7 +833,7 @@ const UserDashboardPage = () => {
             color="inherit"
             size="small"
             variant="outlined"
-            onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
+            onClick={() => navigate('/user/aspirants/declaration', { state: { resume: true } })}
             sx={{ whiteSpace: 'nowrap', fontFamily: FF, fontWeight: 700 }}
           >
             {t('userDashboard.actions.continueAspirantRegistration')}
@@ -851,7 +855,7 @@ const UserDashboardPage = () => {
               size="small"
               variant="outlined"
               fullWidth
-              onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
+              onClick={() => navigate('/user/aspirants/declaration', { state: { resume: true } })}
               sx={{ fontFamily: FF, fontWeight: 700 }}
             >
               {t('userDashboard.actions.continueAspirantRegistration')}

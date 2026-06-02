@@ -30,7 +30,7 @@ const SopPage = () => {
 
     const handleAgreeAndReturn = () => {
         try { localStorage.setItem(SOP_AGREED_KEY, 'true'); } catch { /* ignore */ }
-        navigate('/user/aspirants/register', { replace: true });
+        navigate('/user/aspirants/declaration', { replace: true });
     };
 
     React.useEffect(() => {
@@ -118,7 +118,7 @@ const SopPage = () => {
                     setSopAgreed={setSopAgreed}
                     onAgree={handleAgreeAndReturn}
                     onCancel={fromAspirantRegistration
-                        ? () => navigate('/user/aspirants/register', { replace: true })
+                        ? () => navigate('/user/aspirants/declaration', { replace: true })
                         : undefined}
                     hideAgreement
                 />
@@ -131,7 +131,7 @@ const SopPage = () => {
                         fullWidth
                         variant="contained"
                         startIcon={<ArrowBackIcon />}
-                        onClick={() => navigate('/user/aspirants/register', { replace: true })}
+                        onClick={() => navigate('/user/aspirants/declaration', { replace: true })}
                         sx={{
                             borderRadius: 3,
                             textTransform: 'none',
@@ -183,7 +183,7 @@ const SopPage = () => {
                     <Button
                         fullWidth
                         variant="outlined"
-                        onClick={() => navigate('/user/aspirants/register')}
+                        onClick={() => navigate('/user/aspirants/declaration')}
                         sx={{
                             borderRadius: 3,
                             textTransform: 'none',

@@ -464,8 +464,8 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
   // Path passed to the aspirant-register page — carries the current election
   // type so the CandidateInformationStep can pre-select the matching tab.
   const registerPath = autoElectionType
-    ? `/user/aspirants/register?type=${encodeURIComponent(autoElectionType)}`
-    : '/user/aspirants/register';
+    ? `/user/aspirants/declaration?type=${encodeURIComponent(autoElectionType)}`
+    : '/user/aspirants/declaration';
   const autoUserConstituencyId = (() => {
     if (!user) return null;
     switch (autoElectionType) {
@@ -644,7 +644,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
   })();
 
   const handleNavigateToRegistration = () => {
-    navigate('/user/aspirants/register', { state: { resume: true } });
+    navigate(registerPath, { state: { resume: true } });
   };
 
   const handleToggleAttend = async (aspirantId: number, visitId: number) => {
