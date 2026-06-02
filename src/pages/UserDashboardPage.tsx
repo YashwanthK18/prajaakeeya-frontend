@@ -815,11 +815,62 @@ const UserDashboardPage = () => {
     </Box>
   );
 
+  const pendingAspirantAlert = user?.role === 'aspirant' && (user as any)?.documentStatus !== 'completed' && !pendingAlertDismissed && (
+    <Alert
+      severity="warning"
+      sx={{
+        borderRadius: 2,
+        border: `1px solid ${BORDER}`,
+        '& .MuiAlert-message': { width: '100%', fontFamily: FF },
+      }}
+      action={isSm ? undefined : (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            color="inherit"
+            size="small"
+            variant="outlined"
+            onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
+            sx={{ whiteSpace: 'nowrap', fontFamily: FF, fontWeight: 700 }}
+          >
+            {t('userDashboard.actions.continueAspirantRegistration')}
+          </Button>
+          <IconButton size="small" color="inherit" onClick={() => setPendingAlertDismissed(true)}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      )}
+    >
+      <Stack spacing={1}>
+        <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: FF }}>
+          {t('userDashboard.actions.pendingAspirantAlert')}
+        </Typography>
+        {isSm && (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              color="inherit"
+              size="small"
+              variant="outlined"
+              fullWidth
+              onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
+              sx={{ fontFamily: FF, fontWeight: 700 }}
+            >
+              {t('userDashboard.actions.continueAspirantRegistration')}
+            </Button>
+            <IconButton size="small" color="inherit" onClick={() => setPendingAlertDismissed(true)}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        )}
+      </Stack>
+    </Alert>
+  );
+
   return (
     <>
       {isSm ? (
         <Stack spacing={2.5} sx={{ fontFamily: FF, pb: 2 }}>
           {mobileHero}
+          {pendingAspirantAlert}
           {isAspirant && mobileAspirantTiles}
           <WardCandidateListPage embedded />
         </Stack>
@@ -897,55 +948,7 @@ const UserDashboardPage = () => {
         </Box>
       </motion.div>
 
-      {user?.role === 'aspirant' && (user as any)?.documentStatus !== 'completed' && !pendingAlertDismissed && (
-        <Alert
-          severity="warning"
-          sx={{
-            borderRadius: 2,
-            border: `1px solid ${BORDER}`,
-            '& .MuiAlert-message': { width: '100%', fontFamily: FF },
-          }}
-          action={isSm ? undefined : (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Button
-                color="inherit"
-                size="small"
-                variant="outlined"
-                onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
-                sx={{ whiteSpace: 'nowrap', fontFamily: FF, fontWeight: 700 }}
-              >
-                {t('userDashboard.actions.continueAspirantRegistration')}
-              </Button>
-              <IconButton size="small" color="inherit" onClick={() => setPendingAlertDismissed(true)}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          )}
-        >
-          <Stack spacing={1}>
-            <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: FF }}>
-              {t('userDashboard.actions.pendingAspirantAlert')}
-            </Typography>
-            {isSm && (
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Button
-                  color="inherit"
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => navigate('/user/aspirants/register', { state: { resume: true } })}
-                  sx={{ fontFamily: FF, fontWeight: 700 }}
-                >
-                  {t('userDashboard.actions.continueAspirantRegistration')}
-                </Button>
-                <IconButton size="small" color="inherit" onClick={() => setPendingAlertDismissed(true)}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Stack>
-            )}
-          </Stack>
-        </Alert>
-      )}
+      {pendingAspirantAlert}
 
 
       <Box

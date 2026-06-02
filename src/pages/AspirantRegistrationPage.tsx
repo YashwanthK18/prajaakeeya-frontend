@@ -206,10 +206,25 @@ const AspirantRegistrationPage = () => {
     }
   }, [watchedValues, answers, DRAFT_KEY]);
 
+  // When returning from the Documents page via "Back", jump straight to the
+  // Candidate Information step (step 2 = activeStep 1) and suppress the
+  // auto-redirect-to-documents below so the user can edit their details.
+  const skipAutoRedirectRef = useRef<boolean>(
+    typeof (location as any)?.state?.goToStep === 'number'
+  );
+  useEffect(() => {
+    const goToStep = (location as any)?.state?.goToStep;
+    if (typeof goToStep === 'number') {
+      skipAutoRedirectRef.current = true;
+      setActiveStep(goToStep);
+      window.scrollTo(0, 0);
+    }
+  }, [location.key]);
+
   // On initial load, navigate to Documents page if user already has an aspirant record
   const hasSkippedToDocsRef = useRef(false);
   useEffect(() => {
-    if (user?.aspirantId && !hasSkippedToDocsRef.current && activeStep === 0 && !loading) {
+    if (user?.aspirantId && !hasSkippedToDocsRef.current && !skipAutoRedirectRef.current && activeStep === 0 && !loading) {
       hasSkippedToDocsRef.current = true;
       navigate('/user/aspirants/documents', { replace: true });
     }

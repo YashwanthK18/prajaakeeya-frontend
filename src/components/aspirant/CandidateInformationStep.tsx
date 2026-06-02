@@ -447,14 +447,26 @@ const CandidateInformationStep = ({
   // "Register as Aspirant" from the aspirants list on a specific tab opens
   // the registration form already focused on that election type.
   const [searchParams] = useSearchParams();
+  const TAB_KEY = `aspirant_active_tab_${storeUser?.id ?? 'guest'}`;
   const initialTabFromQuery: AspirantTab = (() => {
     const ty = searchParams.get('type');
     if (ty === 'lok_sabha') return 'mp';
     if (ty === 'state_assembly') return 'mla';
     if (ty === 'municipal_corporation' || ty === 'gram_panchayat') return 'ward_panchayat';
+    // No query param (e.g. returning from the Documents page via "Back") —
+    // restore the last-selected tab so the chosen election type isn't lost.
+    try {
+      const saved = sessionStorage.getItem(TAB_KEY);
+      if (saved === 'mp' || saved === 'mla' || saved === 'ward_panchayat') return saved;
+    } catch { /* ignore */ }
     return 'mp';
   })();
   const [activeTab, setActiveTab] = useState<AspirantTab>(initialTabFromQuery);
+
+  // Persist the active tab so navigating away and back restores the selection.
+  useEffect(() => {
+    try { sessionStorage.setItem(TAB_KEY, activeTab); } catch { /* ignore */ }
+  }, [activeTab, TAB_KEY]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   // If a voting window is currently open for a given election type, registration
