@@ -20,7 +20,29 @@ env:
   AWS_REGION: ap-south-1
 
 jobs:
+  # ── Gate: lint + unit/UI tests must pass before anything deploys ──────────
+  # The `deploy` job below declares `needs: test`, so if a single test fails
+  # this job fails and the deployment never starts.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:run
+
   deploy:
+    needs: test                 # ← deploy ONLY runs if the `test` job succeeded
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

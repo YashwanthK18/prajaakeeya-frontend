@@ -1,8 +1,29 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // ---- Vitest test configuration ----
+  // Kept inside vite.config.js (not a separate vitest.config.ts) so tests reuse
+  // the same plugins/resolve config as the app. This block only affects tests.
+  test: {
+    globals: true,            // use describe/it/expect without importing them
+    environment: 'jsdom',     // simulate a browser (document/window) in Node
+    setupFiles: './src/test/setupTests.ts', // runs before every test file
+    css: false,               // skip CSS processing in tests (faster)
+    // Vitest auto-discovers any *.test.ts(x) / *.spec.ts(x) under src/.
+    // Exclude build output and (future) Playwright e2e tests.
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],          // terminal summary + HTML report in /coverage
+      exclude: [
+        '**/*.config.*', '**/*.d.ts', 'src/index.tsx', 'src/main.tsx',
+        'src/vite-env.d.ts', '**/types/**', 'src/test/**', 'e2e/**',
+      ],
+    },
+  },
   plugins: [
     react(),
     VitePWA({
