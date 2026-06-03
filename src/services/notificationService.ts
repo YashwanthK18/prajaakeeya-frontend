@@ -84,3 +84,10 @@ export const deleteNotification = (id: number) =>
 
 export const clearAllNotifications = () =>
   apiClient.delete<DeleteNotificationResponse>('/notifications');
+
+// ── Web push (FCM) device tokens ──────────────────────────────────────────
+export const registerDeviceToken = (token: string, platform?: string) =>
+  apiClient.post('/notifications/device-token', { token, platform });
+
+export const unregisterDeviceToken = (token: string) =>
+  apiClient.delete('/notifications/device-token', { data: { token } });

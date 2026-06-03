@@ -37,3 +37,8 @@ Thumbs.db
 .eslintcache
 .turbo
 .parcel-cache
+
+# Firebase service-account secrets (never belong in the frontend)
+*-firebase-adminsdk-*.json
+*serviceAccount*.json
+.env.local

@@ -12,6 +12,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import GuestLayout from "./layouts/GuestLayout";
 import useAuthStore from "./store/useAuthStore";
+import { setupPushForUser } from "./services/pushNotifications";
 import Preloader, { dismissPreloader } from "./components/Preloader";
 import OfflineBanner from "./components/OfflineBanner";
 
@@ -122,6 +123,15 @@ const App = () => {
       void fetchProfile();
     }
   }, [token, fetchProfile]);
+
+  useEffect(() => {
+    // Wire web push (FCM) for the signed-in user: registers silently if the
+    // user already granted notifications, otherwise prompts on their next
+    // gesture. No-op unless Firebase env is configured + push is supported.
+    if (isAuthenticated && token) {
+      return setupPushForUser();
+    }
+  }, [isAuthenticated, token]);
 
   useEffect(() => {
     // Dismiss the preloader after the animation completes (~5 s)

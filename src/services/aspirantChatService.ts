@@ -18,6 +18,44 @@ export const getAspirantMessages = (aspirantId: number, page = 1, limit = 50) =>
     params: { page, limit }
   });
 
+// ── Live SSE stream for an aspirant chat room ─────────────────────────────
+const API_HOST = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL;
+const API_BASE = `${API_HOST ? String(API_HOST).replace(/\/+$/g, '') : ''}/api`;
+
+export interface ChatStreamHandlers {
+  onCreated?: (msg: AspirantChatMessageDto) => void;
+  onDeleted?: (id: number) => void;
+}
+
+/**
+ * Subscribe to the live Server-Sent Events stream for an aspirant chat room.
+ * EventSource can't send headers, so the JWT goes in the query string (the
+ * backend's SSE guard reads it there). Returns the EventSource — call `.close()`
+ * to unsubscribe — or `null` when SSE isn't available.
+ */
+export function subscribeToAspirantChat(
+  aspirantId: number,
+  token: string,
+  handlers: ChatStreamHandlers,
+): EventSource | null {
+  if (typeof window === 'undefined' || typeof EventSource === 'undefined' || !token) return null;
+  const url = `${API_BASE}/aspirants/${aspirantId}/chat/stream?token=${encodeURIComponent(token)}`;
+  const es = new EventSource(url);
+  es.onopen = () => console.info('[chat-sse] connected to aspirant', aspirantId);
+  es.onerror = (e) => console.warn('[chat-sse] connection error / closed (auto-retry)', e);
+  es.addEventListener('message.created', (e) => {
+    try { handlers.onCreated?.(JSON.parse((e as MessageEvent).data)); } catch { /* ignore */ }
+  });
+  es.addEventListener('message.deleted', (e) => {
+    try {
+      const d = JSON.parse((e as MessageEvent).data);
+      if (d && d.id != null) handlers.onDeleted?.(Number(d.id));
+    } catch { /* ignore */ }
+  });
+  // 'ping' heartbeats are ignored.
+  return es;
+}
+
 export const getWardMessages = (wardNumber: string | number, page = 1, limit = 50) =>
   apiClient.get<{ data: AspirantChatMessageDto[]; meta: any }>(`/aspirant-discussion/ward/${wardNumber}/messages`, {
     params: { page, limit }

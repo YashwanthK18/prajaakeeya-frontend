@@ -68,6 +68,12 @@ const useAuthStore = create<AuthState>()(
         Object.entries(preserved).forEach(([key, val]) => localStorage.setItem(key, val));
       },
       logout: () => {
+        // Best-effort: drop this device's push token (auth header still valid
+        // here). Dynamic import avoids a circular dependency; fire-and-forget —
+        // the backend also self-prunes stale tokens, so it's non-critical.
+        import('../services/pushNotifications')
+          .then(m => m.disablePushNotifications())
+          .catch(() => undefined);
         set({ token: null, user: null, isAdmin: false, isAuthenticated: false });
         delete apiClient.defaults.headers.common.Authorization;
         // Clear all localStorage except theme, language, and civic raised state

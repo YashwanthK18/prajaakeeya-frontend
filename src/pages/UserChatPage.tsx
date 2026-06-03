@@ -8,7 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import useAuthStore from '../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
-import { getAspirantMessages, postUserChatMessage, AspirantChatMessageDto } from '../services/aspirantChatService';
+import { getAspirantMessages, postUserChatMessage, subscribeToAspirantChat, AspirantChatMessageDto } from '../services/aspirantChatService';
 import { fetchWardAspirants, fetchWardAspirantsByNumber } from '../services/aspirantService';
 
 const UserChatPage: React.FC = () => {
@@ -65,11 +65,27 @@ const UserChatPage: React.FC = () => {
         fetchMessages({ showLoading: true, scroll: true });
     }, [fetchMessages]);
 
-    // Poll for new messages every 5 seconds so other users see them without a refresh
+    // Live updates via Server-Sent Events (replaces aggressive polling). A slow
+    // fallback poll reconciles in case the stream drops silently.
     React.useEffect(() => {
         if (!aspirantId) return;
-        const id = setInterval(() => fetchMessages(), 5000);
-        return () => clearInterval(id);
+        const token = useAuthStore.getState().token;
+        const es = token
+            ? subscribeToAspirantChat(Number(aspirantId), token, {
+                  onCreated: (msg) => {
+                      setMessages((prev) => {
+                          if (prev.some((m) => m.id === msg.id)) return prev;
+                          const next = [...prev, msg];
+                          next.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                          return next;
+                      });
+                      setTimeout(scrollToBottom, 50);
+                  },
+                  onDeleted: (id) => setMessages((prev) => prev.filter((m) => m.id !== id)),
+              })
+            : null;
+        const pollId = setInterval(() => fetchMessages(), 30000);
+        return () => { es?.close(); clearInterval(pollId); };
     }, [aspirantId, fetchMessages]);
 
     React.useEffect(() => {
@@ -110,7 +126,9 @@ const UserChatPage: React.FC = () => {
         try {
             const resp = await postUserChatMessage(Number(aspirantId), { content: text.trim() });
             const m = resp.data as AspirantChatMessageDto;
-            setMessages((prev) => [...prev, m]);
+            // The SSE stream also delivers this message back to us — dedup by id
+            // so it isn't added twice (whichever arrives first wins).
+            setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
             setText('');
             setTimeout(scrollToBottom, 50);
         } catch (err: any) {
