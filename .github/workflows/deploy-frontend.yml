@@ -32,6 +32,15 @@ jobs:
         with:
           node-version: 20
 
+      # The lockfile is generated with npm 11 (dev machines). node 20 ships
+      # npm 10, whose stricter reader rejects npm 11's nested-dependency
+      # lockfile format ("Missing esbuild@... from lock file"). Pin CI to
+      # npm 11 so `npm ci` reads the lockfile exactly as it was written.
+      # npm 11 also reads older lockfile formats, so this stays correct no
+      # matter which npm a teammate uses.
+      - name: Pin npm to match the lockfile
+        run: npm install -g npm@11
+
       - name: Install deps
         run: npm ci
 
@@ -50,6 +59,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # The lockfile is generated with npm 11 (dev machines). node 20 ships
+      # npm 10, whose stricter reader rejects npm 11's nested-dependency
+      # lockfile format ("Missing esbuild@... from lock file"). Pin CI to
+      # npm 11 so `npm ci` reads the lockfile exactly as it was written.
+      # npm 11 also reads older lockfile formats, so this stays correct no
+      # matter which npm a teammate uses.
+      - name: Pin npm to match the lockfile
+        run: npm install -g npm@11
 
       - name: Install deps
         run: npm ci
