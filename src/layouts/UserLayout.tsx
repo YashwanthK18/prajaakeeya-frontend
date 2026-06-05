@@ -50,8 +50,10 @@ const UserLayout = () => {
   const isVotersPage = location.pathname === '/user/voters';
   const isCivicIssuesPage = location.pathname === '/user/civic-issues';
   const isSopPage = location.pathname === '/user/sop';
-  const isAspirantRegister = location.pathname === '/user/aspirants/register' || location.pathname === '/user/aspirants/declaration';
+  const isAspirantRegister = location.pathname === '/user/aspirants/register' || location.pathname === '/user/aspirants/declaration' || location.pathname === '/user/aspirants/documents';
   const isNotificationsPage = location.pathname === '/user/notifications';
+  const isRegisteredAspirants = location.pathname === '/user/registered-aspirants';
+  const isProfilePage = location.pathname === '/user/complete-profile' || location.pathname === '/user/dashboard/profile';
 
   const [aspirantName, setAspirantName] = useState<string | null>(null);
   const [aspirantLoading, setAspirantLoading] = useState(user?.role === 'aspirant');
@@ -128,8 +130,8 @@ const UserLayout = () => {
           <Toolbar sx={{ justifyContent: 'space-between', py: { xs: 0.9, sm: 1.2 }, minHeight: { xs: 56, sm: 72 }, px: { xs: 1 } }}>
             {/* Left: back button (mobile, non-dashboard) or logo */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {/* Mobile back button — shown on all pages except dashboard, voters, civic issues, sop, and aspirant register */}
-              {!isDashboard && !isVotersPage && !isCivicIssuesPage && !isSopPage && !isAspirantRegister && !isNotificationsPage && (
+              {/* Mobile back button — shown on all pages except dashboard, voters, civic issues, sop, aspirant register, notifications, and registered-aspirants */}
+              {!isDashboard && !isVotersPage && !isCivicIssuesPage && !isSopPage && !isAspirantRegister && !isNotificationsPage && !isRegisteredAspirants && !isProfilePage && (
                 <IconButton
                   onClick={() => navigate(-1)}
                   size="small"
@@ -148,7 +150,7 @@ const UserLayout = () => {
 
               {/* Logo — always on desktop, on dashboard/voters/civic-issues/sop on mobile */}
               <Box
-                sx={{ display: { xs: (isDashboard || isVotersPage || isCivicIssuesPage || isSopPage || isAspirantRegister || isNotificationsPage) ? 'flex' : 'none', sm: 'flex' }, alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
+                sx={{ display: { xs: (isDashboard || isVotersPage || isCivicIssuesPage || isSopPage || isAspirantRegister || isNotificationsPage || isRegisteredAspirants || isProfilePage) ? 'flex' : 'none', sm: 'flex' }, alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
                 onClick={() => navigate('/user/dashboard')}
               >
                 <Box sx={{
