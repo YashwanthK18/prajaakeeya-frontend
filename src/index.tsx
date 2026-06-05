@@ -59,7 +59,7 @@ const ThemedApp = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <App />
         </BrowserRouter>
       </Sentry.ErrorBoundary>
