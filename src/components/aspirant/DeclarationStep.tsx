@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@mui/material';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+// import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // needed by the commented-out Back button below
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import GavelIcon from '@mui/icons-material/Gavel';
@@ -55,7 +55,7 @@ const DeclarationStep = ({
   declarationChecks, setDeclarationChecks,
   digitalSignature, setDigitalSignature,
   canProceed, loading,
-  onBack, onSubmit, onCancel,
+  onSubmit,
 }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -358,6 +358,9 @@ const DeclarationStep = ({
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-end' } }}>
+            {/* Home & Back buttons — commented out per request. To restore: uncomment
+                this block, re-add `onBack, onCancel` to the props destructure above,
+                and uncomment the ArrowBackIcon import near the top.
             {onCancel && (
               <Box sx={{ flex: 1 }}>
                 <Button
@@ -400,6 +403,7 @@ const DeclarationStep = ({
                 {t('forms.aspirant.navigation.back')}
               </Button>
             </Box>
+            */}
 
             <Box sx={{ flex: 1 }}>
               <motion.div animate={canProceed ? { scale: [1, 1.04, 1] } : { scale: 1 }} transition={{ duration: 0.4 }}>

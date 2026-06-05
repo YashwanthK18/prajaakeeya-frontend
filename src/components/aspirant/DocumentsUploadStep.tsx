@@ -102,7 +102,6 @@ const DocumentsUploadStep = ({
   handleFileUpload,
   onBack,
   onNext,
-  onCancel,
   canProceed,
   submitButtonText,
   cameraActive,
@@ -365,8 +364,10 @@ const DocumentsUploadStep = ({
         bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(17,24,39,0.02)',
         borderTop: `1px solid ${cardBorder}`,
       }}>
-        <Stack direction="row" spacing={1.5} justifyContent="space-between">
-          <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1.5} sx={{ ml: 'auto', width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-end' } }}>
+          <Stack direction="row" spacing={1} sx={{ flex: { xs: 1, sm: 'none' } }}>
+            {/* Home button — commented out per request. To restore: uncomment this
+                block and re-add `onCancel` to the props destructure above.
             {onCancel && (
               <Button
                 variant="outlined"
@@ -382,11 +383,13 @@ const DocumentsUploadStep = ({
                 {t('common.home')}
               </Button>
             )}
+            */}
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
               onClick={onBack}
               sx={{
+                width: { xs: '100%', sm: 'auto' },
                 fontFamily: FF,
                 fontWeight: 700,
                 color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(15,23,42,0.74)',
@@ -403,6 +406,8 @@ const DocumentsUploadStep = ({
             onClick={onNext}
             disabled={!canProceed}
             sx={{
+              flex: { xs: 1, sm: 'none' },
+              width: { xs: '100%', sm: 'auto' },
               fontFamily: FF,
               fontWeight: 800,
               px: { xs: 2.8, sm: 3.5 },

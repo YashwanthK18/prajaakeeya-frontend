@@ -180,7 +180,7 @@ const getDisabledFieldSx = (isDark: boolean) => ({
 const CandidateInformationStep = ({
   register, errors, watch, setValue, trigger, setError, clearErrors,
   loading, user,
-  onNext, onBack, onCancel,
+  onNext, onBack,
 }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -1241,6 +1241,8 @@ const CandidateInformationStep = ({
 
           return (
             <Stack direction="row" spacing={1.5} sx={{ ml: 'auto', width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-end' } }}>
+              {/* Home button — commented out per request. To restore: uncomment this
+                  block and re-add `onCancel` to the props destructure above.
               {onCancel && (
                 <Button
                   variant="outlined"
@@ -1255,6 +1257,7 @@ const CandidateInformationStep = ({
                   {t('common.home')}
                 </Button>
               )}
+              */}
 
               <Button
                 variant="outlined"
