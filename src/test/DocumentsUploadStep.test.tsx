@@ -101,11 +101,11 @@ describe('DocumentsUploadStep', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a Home/cancel button when onCancel is provided', () => {
+  it('does not render the Home/cancel button (commented out) even when onCancel is provided', () => {
     renderWithProviders(<DocumentsUploadStep {...makeProps({ onCancel: vi.fn() })} />);
-    // t('common.home') echoes the key in our mock.
+    // The Home button is intentionally commented out; t('common.home') echoes the key in our mock.
     expect(
-      screen.getByRole('button', { name: 'common.home' }),
-    ).toBeInTheDocument();
+      screen.queryByRole('button', { name: 'common.home' }),
+    ).not.toBeInTheDocument();
   });
 });

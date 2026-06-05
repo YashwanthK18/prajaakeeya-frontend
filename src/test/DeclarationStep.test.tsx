@@ -50,14 +50,15 @@ describe('DeclarationStep', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the Back and Next navigation buttons', () => {
+  it('shows the Next navigation button (Home & Back are commented out)', () => {
     renderWithProviders(<DeclarationStep {...makeProps()} />);
-    expect(
-      screen.getByRole('button', { name: /forms.aspirant.navigation.back/ }),
-    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /forms.aspirant.navigation.next/ }),
     ).toBeInTheDocument();
+    // Home & Back buttons are intentionally commented out in this step.
+    expect(
+      screen.queryByRole('button', { name: /forms.aspirant.navigation.back/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('disables the Next/submit button when canProceed is false', () => {
