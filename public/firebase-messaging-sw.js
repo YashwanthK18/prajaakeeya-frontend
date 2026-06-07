@@ -24,31 +24,16 @@ const firebaseConfig = {
   appId: params.get("appId"),
 };
 
-if (
-  firebaseConfig.apiKey &&
-  firebaseConfig.projectId &&
-  firebaseConfig.messagingSenderId &&
-  firebaseConfig.appId
-) {
-  firebase.initializeApp(firebaseConfig);
-  // Initialising messaging() installs FCM's default background handler, which
-  // auto-displays `notification` / `webpush.notification` payloads. We do NOT
-  // register onBackgroundMessage — that would duplicate the auto-shown banner.
-  firebase.messaging();
-}
-
-// Activate a new version of this SW immediately instead of waiting for every
-// tab to close — so push/click fixes reach devices on the next visit, not days
-// later. (This SW lives at its own scope and controls no pages, so claiming is
-// harmless.)
+// Activate a new version of this SW immediately instead of waiting for every tab
+// to close — so push/click fixes reach devices on the next visit, not days later.
+// (This SW lives at its own scope and controls no pages, so claiming is harmless.)
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
-// ─── TEMPORARY DEBUG — remove once push payloads are confirmed ───────────────
-// Logs the RAW push payload exactly as the backend sent it (notification + data
-// blocks), so we can see whether the routing ids (type/aspirantId/electionId)
-// are present. View in DevTools → Application → Service Workers → "inspect" on
-// firebase-messaging-sw.js → Console.
+// ─── TEMPORARY DEBUG — remove once push routing is confirmed ─────────────────
+// Logs the RAW push payload exactly as the backend sent it, so we can confirm
+// data.link / type / ids are present. DevTools → Application → Service Workers →
+// "inspect" on firebase-messaging-sw.js → Console.
 self.addEventListener("push", (event) => {
   try {
     console.log("[push DEBUG] raw payload:", event.data ? event.data.json() : null);
@@ -70,32 +55,74 @@ function notificationLink(data) {
   return data.link || "/user/dashboard";
 }
 
-// Own the notification tap. We navigate explicitly here (rather than relying on
-// the Firebase SDK's built-in fcm_options.link handler, which did not fire) and
-// we do NOT set fcm_options.link on the backend, so there is exactly one
-// handler — no double-open. openWindow opens the deep link reliably across
-// Chrome / Firefox / Android TWA; if a tab is already on the target, we focus it.
+// Own the notification tap.
+//
+// CRITICAL ORDERING: this listener is registered BEFORE firebase.messaging()
+// (the init block is at the BOTTOM of this file). The FCM compat SDK installs
+// its OWN notificationclick handler when messaging() runs, which calls
+// stopImmediatePropagation() and can pre-empt a handler registered after it —
+// that is what made taps do nothing when no tab was open (FCM's default handler
+// no-ops with zero windows and no fcm_options.link). Registering ours first AND
+// calling stopImmediatePropagation() here guarantees exactly one handler — ours.
+//
+// We use focus() + openWindow() only. WindowClient.navigate() is NOT usable:
+// this SW controls no pages (separate scope), so navigate() rejects cross-scope.
 self.addEventListener("notificationclick", (event) => {
+  event.stopImmediatePropagation();
   event.notification.close();
+
   const data = (event.notification && event.notification.data) || {};
-  const path = notificationLink(data);
-  const targetUrl = new URL(path, self.location.origin).href;
+  const targetUrl = new URL(notificationLink(data), self.location.origin).href;
+  const targetPath = new URL(targetUrl).pathname;
   console.log("[push DEBUG] notificationclick →", targetUrl, "data:", data);
 
   event.waitUntil(
     (async () => {
-      const clientList = await self.clients.matchAll({
-        type: "window",
-        includeUncontrolled: true,
-      });
+      let clientList = [];
+      try {
+        clientList = await self.clients.matchAll({
+          type: "window",
+          includeUncontrolled: true,
+        });
+      } catch (e) {
+        clientList = [];
+      }
+
+      // If a tab is already on the target page, focus it (avoids a duplicate).
+      // Compare normalized pathnames so a trailing slash / query / hash on
+      // client.url is not a false miss.
       for (const client of clientList) {
-        if (client.url === targetUrl && "focus" in client) {
+        let clientPath = "";
+        try {
+          clientPath = new URL(client.url).pathname;
+        } catch (e) {
+          clientPath = "";
+        }
+        if (clientPath === targetPath && "focus" in client) {
           return client.focus();
         }
       }
+
+      // Otherwise open the deep link in a new window. Reliable with zero windows
+      // open (the primary real-world case) across Chrome / Firefox / Android TWA.
       if (self.clients.openWindow) {
         return self.clients.openWindow(targetUrl);
       }
+      return undefined;
     })(),
   );
 });
+
+// Initialise Firebase Messaging AFTER the notificationclick handler above is
+// wired, so the FCM SDK's built-in handler can't pre-empt ours. messaging()
+// installs FCM's default background push handler, which auto-displays the
+// `notification` / `webpush.notification` payload — we rely on that for display.
+if (
+  firebaseConfig.apiKey &&
+  firebaseConfig.projectId &&
+  firebaseConfig.messagingSenderId &&
+  firebaseConfig.appId
+) {
+  firebase.initializeApp(firebaseConfig);
+  firebase.messaging();
+}
