@@ -58,16 +58,44 @@ self.addEventListener("push", (event) => {
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Notification-tap navigation is handled by the Firebase SDK's built-in
-// notificationclick handler, which opens `webpush.fcm_options.link` (set by the
-// backend, FirebaseService → an absolute https deep link). We deliberately do
-// NOT add a competing navigation handler here — a second openWindow would
-// double-open / race the SDK's. This listener is diagnostic-only: it logs so we
-// can confirm in the SW console whether the tap reaches the service worker
-// (useful for the Android TWA case). Remove the log once confirmed.
+// Resolve the in-app deep link from the push payload. The backend sends it as a
+// RELATIVE path in data.link; FCM may nest the original data under FCM_MSG when
+// it auto-displays the notification, so unwrap that. Falls back to the signed-in
+// dashboard so a tap always lands somewhere useful.
+function notificationLink(data) {
+  data = data || {};
+  if (data.FCM_MSG && data.FCM_MSG.data) {
+    data = { ...data, ...data.FCM_MSG.data };
+  }
+  return data.link || "/user/dashboard";
+}
+
+// Own the notification tap. We navigate explicitly here (rather than relying on
+// the Firebase SDK's built-in fcm_options.link handler, which did not fire) and
+// we do NOT set fcm_options.link on the backend, so there is exactly one
+// handler — no double-open. openWindow opens the deep link reliably across
+// Chrome / Firefox / Android TWA; if a tab is already on the target, we focus it.
 self.addEventListener("notificationclick", (event) => {
-  console.log(
-    "[push DEBUG] notificationclick fired. data:",
-    event.notification && event.notification.data,
+  event.notification.close();
+  const data = (event.notification && event.notification.data) || {};
+  const path = notificationLink(data);
+  const targetUrl = new URL(path, self.location.origin).href;
+  console.log("[push DEBUG] notificationclick →", targetUrl, "data:", data);
+
+  event.waitUntil(
+    (async () => {
+      const clientList = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of clientList) {
+        if (client.url === targetUrl && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })(),
   );
 });
