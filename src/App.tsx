@@ -12,7 +12,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import GuestLayout from "./layouts/GuestLayout";
 import useAuthStore from "./store/useAuthStore";
-import { setupPushForUser, setPushNavigator } from "./services/pushNotifications";
+import { setupPushForUser, setPushNavigator, consumePendingPushRoute } from "./services/pushNotifications";
 import Preloader, { dismissPreloader } from "./components/Preloader";
 import OfflineBanner from "./components/OfflineBanner";
 
@@ -127,6 +127,44 @@ const App = () => {
   }, [navigate]);
 
   useEffect(() => {
+    // Web-push notification tap → navigate. The FCM service worker stashes the
+    // target route in the Cache API; we PULL it whenever the app (re)gains focus.
+    // This is reliable even for a page launched via openWindow (which loads
+    // UNCONTROLLED, so the SW's postMessage isn't delivered — the real cause of
+    // "navigates only after a refresh"). Triggers: mount, visibilitychange,
+    // window focus, and the PUSH_NAVIGATE message as a fast-path nudge. The
+    // consumer deletes the stash, so multiple triggers never double-navigate.
+    void consumePendingPushRoute();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void consumePendingPushRoute();
+    };
+    const onFocus = () => void consumePendingPushRoute();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onFocus);
+
+    let onSwMessage: ((event: MessageEvent) => void) | undefined;
+    if ("serviceWorker" in navigator) {
+      onSwMessage = (event: MessageEvent) => {
+        const msg = event.data as { type?: string } | null;
+        if (msg && msg.type === "PUSH_NAVIGATE") void consumePendingPushRoute();
+      };
+      navigator.serviceWorker.addEventListener("message", onSwMessage);
+      // addEventListener('message') does not start the client message queue;
+      // startMessages() does. Harmless even though the stash is the primary path.
+      navigator.serviceWorker.startMessages();
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onFocus);
+      if (onSwMessage && "serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("message", onSwMessage);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     // On page reload / first mount, if we have a persisted token, fetch fresh user data
     if (token) {
       void fetchProfile();
@@ -141,21 +179,6 @@ const App = () => {
       return setupPushForUser();
     }
   }, [isAuthenticated, token]);
-
-  useEffect(() => {
-    // When a web-push notification is tapped while a tab is already open, the
-    // FCM service worker posts the target route here so we navigate in-app
-    // (client-side) instead of forcing a full page reload.
-    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-    const onSwMessage = (event: MessageEvent) => {
-      const data = event.data as { type?: string; url?: string } | null;
-      if (data?.type === "NOTIFICATION_NAVIGATE" && typeof data.url === "string") {
-        navigate(data.url);
-      }
-    };
-    navigator.serviceWorker.addEventListener("message", onSwMessage);
-    return () => navigator.serviceWorker.removeEventListener("message", onSwMessage);
-  }, [navigate]);
 
   useEffect(() => {
     // Dismiss the preloader after the animation completes (~5 s)

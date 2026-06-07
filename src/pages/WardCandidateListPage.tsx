@@ -3172,7 +3172,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                             rating-window info. Window = next day after contact, 10 AM–10 PM
                             (same calculation as meeting ratings). Hidden once rated. */}
                         {(!!candidate.phone || !!candidate.whatsappNumber) && (() => {
-                          const helperSx = { mt: 0.6, fontFamily: '"Baloo 2", cursive', fontSize: '0.72rem', lineHeight: 1.4, color: '#FFCB00', textAlign: 'center' as const };
+                          const helperSx = { mt: 0.6, fontFamily: '"Baloo 2", cursive', fontSize: '0.72rem', lineHeight: 1.4, color: isDark ? '#FFCB00' : '#412323', textAlign: 'center' as const };
                           const currentRating = contactRatings[candidate.id] ?? getStoredContactRating(candidate.id);
                           const rated = candidate.isContactRated || currentRating > 0;
 
@@ -3227,7 +3227,7 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
                             <Box sx={{ mt: 1.2, mb: 0.5 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.6, mb: 0.9 }}>
                                 <Box component="span" sx={{ color: '#10b981', fontSize: '0.8rem', lineHeight: 1 }}>⚡</Box>
-                                <Typography sx={{ fontSize: '0.6rem', fontWeight: 900, color: GOLD, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                <Typography sx={{ fontSize: '0.6rem', fontWeight: 900, color: isDark ? GOLD : '#412323', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                                   {showContactButtons
                                     ? t('pages.wardCandidates.rateContact', { defaultValue: 'Rate this Contact' })
                                     : t('pages.wardCandidates.contactRated', { defaultValue: 'Contact Rating' })}

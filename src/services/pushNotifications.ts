@@ -164,10 +164,45 @@ function extractLink(detail: unknown): string | null {
   return typeof link === 'string' && link.length > 0 ? link : null;
 }
 
+// ── Web-push deep-link stash (shared with firebase-messaging-sw.js) ──────────
+// The FCM service worker writes the tapped notification's target route into the
+// Cache API (it can't reliably postMessage a page launched via openWindow, which
+// loads uncontrolled). The app PULLS the route here whenever it regains focus,
+// so the navigation works regardless of service-worker control state.
+const PENDING_ROUTE_CACHE = 'push-pending-route';
+const PENDING_ROUTE_KEY = '/__pending_push_route';
+let consumingPendingRoute = false;
+
+/** Read + clear the route the service worker stashed on notification tap, then
+ *  navigate to it in-SPA. Safe to call repeatedly / from multiple triggers
+ *  (visibilitychange, focus, mount, the PUSH_NAVIGATE nudge) — it deletes the
+ *  entry so only the first call navigates. No-op when nothing is pending. */
+export async function consumePendingPushRoute(): Promise<void> {
+  if (consumingPendingRoute) return;
+  if (typeof caches === 'undefined') return;
+  consumingPendingRoute = true;
+  try {
+    const cache = await caches.open(PENDING_ROUTE_CACHE);
+    const res = await cache.match(PENDING_ROUTE_KEY);
+    if (!res) return;
+    await cache.delete(PENDING_ROUTE_KEY);
+    const { route, ts } = (await res.json()) as { route?: string; ts?: number };
+    // Ignore stale stashes (>2 min) so an old tap can't hijack a later focus.
+    if (route && (!ts || Date.now() - ts < 120_000)) {
+      followDeepLink(route);
+    }
+  } catch {
+    /* best-effort */
+  } finally {
+    consumingPendingRoute = false;
+  }
+}
+
 /** Follow a notification deep link. Same-origin targets go through React Router
  *  (no full reload, no WKWebView host-allowlist round-trip); external URLs fall
- *  back to the browser, which the shell opens in SFSafariViewController. */
-function followDeepLink(link: string): void {
+ *  back to the browser, which the shell opens in SFSafariViewController.
+ *  Shared by the iOS native bridge and the web-push stash consumer above. */
+export function followDeepLink(link: string): void {
   try {
     const url = new URL(link, window.location.origin);
     if (url.origin === window.location.origin) {
