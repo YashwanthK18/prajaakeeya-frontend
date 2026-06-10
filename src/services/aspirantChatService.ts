@@ -41,7 +41,6 @@ export function subscribeToAspirantChat(
   if (typeof window === 'undefined' || typeof EventSource === 'undefined' || !token) return null;
   const url = `${API_BASE}/aspirants/${aspirantId}/chat/stream?token=${encodeURIComponent(token)}`;
   const es = new EventSource(url);
-  es.onopen = () => console.info('[chat-sse] connected to aspirant', aspirantId);
   es.onerror = (e) => console.warn('[chat-sse] connection error / closed (auto-retry)', e);
   es.addEventListener('message.created', (e) => {
     try { handlers.onCreated?.(JSON.parse((e as MessageEvent).data)); } catch { /* ignore */ }

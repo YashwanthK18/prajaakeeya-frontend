@@ -1175,7 +1175,24 @@ const WardCandidateListPage = ({ embedded = false }: WardCandidateListPageProps 
         const { data } = await fetchAspirantsByConstituency(electionId, constituencyId, useAuthStore.getState().user?.id);
         const list = Array.isArray(data) ? data : (data as any)?.data ?? [];
         const approved = list.filter((c: any) => c.status === 'approved' && c.documentStatus === 'completed');
-        setCandidates(approved);
+        // Sort order:
+        //  1. Aspirants who have scheduled a meeting go to the very top.
+        //  2. Within each group, highest overall rating first.
+        //  3. Ties keep the API's incoming order (newest first) via the index
+        //     fallback, which also makes the sort stable.
+        const sortedApproved = approved
+          .map((c: any, index: number) => ({ c, index }))
+          .sort((a: any, b: any) => {
+            const ma = Array.isArray(a.c.meetings) && a.c.meetings.length > 0 ? 1 : 0;
+            const mb = Array.isArray(b.c.meetings) && b.c.meetings.length > 0 ? 1 : 0;
+            if (mb !== ma) return mb - ma;
+            const ra = Number(a.c.overallRating?.averageRating) || 0;
+            const rb = Number(b.c.overallRating?.averageRating) || 0;
+            if (rb !== ra) return rb - ra;
+            return a.index - b.index;
+          })
+          .map((entry: any) => entry.c);
+        setCandidates(sortedApproved);
         // Extract vote counts and percentages from inline fields
         const counts: Record<number, number> = {};
         const percentages: Record<number, number> = {};
