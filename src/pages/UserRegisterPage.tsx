@@ -170,7 +170,9 @@ const UserRegisterPage = () => {
     // Mark that this OAuth flow started from the Register page so the
     // callback can show the celebration screen for fresh signups.
     sessionStorage.setItem("__FROM_REGISTER__", "1");
-    window.location.href = getGoogleOAuthUrl();
+    // replace() (not href=) so the register page is REPLACED in history, not
+    // stacked — so after sign-in, Back can't re-enter the Google sign-in flow.
+    window.location.replace(getGoogleOAuthUrl());
   };
 
   // Apple sign-in is disabled pending native backend integration.

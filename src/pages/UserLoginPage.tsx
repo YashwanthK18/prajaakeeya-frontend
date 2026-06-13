@@ -144,7 +144,11 @@ const UserLoginPage = () => {
     setGoogleLoading(true);
     // Clear any stale auth before starting the OAuth flow
     logout();
-    window.location.href = getGoogleOAuthUrl();
+    // Use replace() (not href=) so the login page is REPLACED in history rather
+    // than stacked. Combined with the callback's navigate(..., { replace: true }),
+    // the whole OAuth round-trip leaves nothing on the back stack — so after
+    // sign-in, Back / pressing login again can't re-enter the Google sign-in flow.
+    window.location.replace(getGoogleOAuthUrl());
   };
 
   useEffect(() => {
